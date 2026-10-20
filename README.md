@@ -56,11 +56,11 @@ Das Vercel-Projekt ist `hagn-und-partner`. Funktionen, Neon und Blob sind für F
 vercel deploy --prod
 ```
 
-Der Code ist auf `main` im GitHub-Repository gespeichert. Die automatische Git-Verknüpfung wartet auf die richtige Kontozuordnung: Vercel nennt `tuv-julius-voningelheim` als GitHub-Namensraum; das persönliche Repository gehört `bthginfo`. In den [Vercel-Kontoeinstellungen](https://vercel.com/account/settings/authentication) muss das Eigentümerkonto `bthginfo` verbunden sein. Die App-Freigabe „All repositories“ ersetzt diese Kontozuordnung nicht. Anschließend lässt sich das Repository unter **Projekteinstellungen → Git** verbinden. Bis dahin funktionieren Code-Deployments über den obigen CLI-Befehl. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website.
+Das Projekt liegt im Vercel-Team `juliusvingelheim-2692s-projects` und ist mit `bthginfo/Hagn-und-Partner` verbunden. Pushes auf `main` lösen die automatische Bereitstellung aus. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website. Die Datenbank und der Blob-Speicher gehören ebenfalls diesem Team.
 
 Vor dem endgültigen Start die gewählte Gestaltung im CMS veröffentlichen, `NEXT_PUBLIC_DESIGN_REVIEW=false` setzen und erneut deployen. Dadurch verschwinden Umschalter und Entwurfs-Noindex. Die endgültige Domain unter **Einstellungen → Allgemein** eintragen. SMTP erst mit den tatsächlichen Zugangsdaten des Mailanbieters aktivieren.
 
-Vercel Hobby erlaubt persönliche, nicht kommerzielle Nutzung. Für den produktiven Kanzleibetrieb ist ein geeigneter kommerzieller Tarif erforderlich: [Vercel Hobby](https://vercel.com/docs/plans/hobby). Neon und Blob wurden im kostenlosen Einstieg eingerichtet; deren aktuelle Kontingente gelten weiterhin. Ein nie erreichtes Monatslimit kann keine Architektur garantieren; die öffentlichen Aufrufe benötigen nach dem Aufwärmen keine Datenbankabfrage.
+Das Projekt verwendet den bestehenden Vercel-Pro-Tarif des Zielteams. Es wurden keine zusätzlichen kostenpflichtigen Funktionen aktiviert. Neon bleibt im kostenlosen Tarif; Blob nutzt die Kontingente des bestehenden Vercel-Tarifs. Ein nie erreichtes Monatslimit kann keine Architektur garantieren; die öffentlichen Aufrufe benötigen nach dem Aufwärmen keine Datenbankabfrage.
 
 ## Prüfungen
 
