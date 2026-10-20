@@ -1,0 +1,252 @@
+[
+  {
+    "id": "original-1",
+    "url": "/images/recht-anwalt-ingolstadt.jpg",
+    "name": "recht-anwalt-ingolstadt.jpg",
+    "alt": "Juristische Fachliteratur in unserer Kanzlei",
+    "type": "image/jpeg",
+    "size": 148530,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-2",
+    "url": "/images/anwalt-ingolstadt-veronika-hagn.jpg",
+    "name": "anwalt-ingolstadt-veronika-hagn.jpg",
+    "alt": "Veronika Hagn, Rechtsanwältin bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 34441,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-3",
+    "url": "/images/anwalt-ingolstadt-markus-stemmer.jpg",
+    "name": "anwalt-ingolstadt-markus-stemmer.jpg",
+    "alt": "Markus Stemmer, Rechtsanwalt bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 28909,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-4",
+    "url": "/images/rechtsgebiete-traffic-unsplash.webp",
+    "name": "rechtsgebiete-traffic-unsplash.webp",
+    "alt": "Straßenverkehr bei Regen – Symbolbild zum Verkehrsrecht",
+    "type": "image/jpeg",
+    "size": 235206,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-5",
+    "url": "/images/rechtsgebiete-housing-unsplash.webp",
+    "name": "rechtsgebiete-housing-unsplash.webp",
+    "alt": "Wohngebäude mit Balkonen – Symbolbild zu Miet- und Immobilienfragen",
+    "type": "image/jpeg",
+    "size": 152836,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-6",
+    "url": "/images/rechtsgebiete-work-unsplash.webp",
+    "name": "rechtsgebiete-work-unsplash.webp",
+    "alt": "Besprechungsraum – Symbolbild für Arbeitswelt und Unternehmen",
+    "type": "image/jpeg",
+    "size": 411438,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-7",
+    "url": "/images/rechtsgebiete-family-unsplash.webp",
+    "name": "rechtsgebiete-family-unsplash.webp",
+    "alt": "Familie bei einem Spaziergang – Symbolbild zum Familienrecht",
+    "type": "image/jpeg",
+    "size": 487396,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-8",
+    "url": "/images/anwalt-ingolstadt-niels-deckert.jpg",
+    "name": "anwalt-ingolstadt-niels-deckert.jpg",
+    "alt": "Dr. iur. Niels Deckert, Rechtsanwalt bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 48159,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-9",
+    "url": "/images/rechtsanwalt-ingolstadt.jpg",
+    "name": "rechtsanwalt-ingolstadt.jpg",
+    "alt": "Empfang unserer Kanzlei in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 36054,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-10",
+    "url": "/images/rechtsanwalt-ingolstadt-susanna-nagel.jpg",
+    "name": "rechtsanwalt-ingolstadt-susanna-nagel.jpg",
+    "alt": "Susanna Nagel, Sekretariat Hagn, Deckert, Stemmer & Partner",
+    "type": "image/jpeg",
+    "size": 46277,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-11",
+    "url": "/images/rechtsanwalt-ingolstadt-ilona-epstein.jpg",
+    "name": "rechtsanwalt-ingolstadt-ilona-epstein.jpg",
+    "alt": "Ilona Epstein, Sekretariat Hagn, Deckert, Stemmer & Partner",
+    "type": "image/jpeg",
+    "size": 29229,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-12",
+    "url": "/images/anwalt-ingolstadt-service.jpg",
+    "name": "anwalt-ingolstadt-service.jpg",
+    "alt": "Besprechungsraum unserer Kanzlei",
+    "type": "image/jpeg",
+    "size": 72285,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-13",
+    "url": "/images/ingolstadt-anwalt-3.jpg",
+    "name": "ingolstadt-anwalt-3.jpg",
+    "alt": "Treppenhaus unserer Kanzlei in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 61762,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-14",
+    "url": "/images/rechtsanwalt-ingolstadt-monika-kuerzinger.jpg",
+    "name": "rechtsanwalt-ingolstadt-monika-kuerzinger.jpg",
+    "alt": "Monika Kürzinger, Sekretariat Hagn, Deckert, Stemmer & Partner",
+    "type": "image/jpeg",
+    "size": 25144,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-15",
+    "url": "/images/rechtsanwalt-ingolstadt-annalena-baumanis.jpg",
+    "name": "rechtsanwalt-ingolstadt-annalena-baumanis.jpg",
+    "alt": "Annalena Baumanis, Sekretariat Hagn, Deckert, Stemmer & Partner",
+    "type": "image/jpeg",
+    "size": 21254,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-16",
+    "url": "/images/rechtsanwalt-ingolstadt-aylin-durgut.jpg",
+    "name": "rechtsanwalt-ingolstadt-aylin-durgut.jpg",
+    "alt": "Aylin Durgut, Sekretariat Hagn, Deckert, Stemmer & Partner",
+    "type": "image/jpeg",
+    "size": 39876,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-17",
+    "url": "/images/anwalt-ingolstadt-gabriela-radlinger.jpg",
+    "name": "anwalt-ingolstadt-gabriela-radlinger.jpg",
+    "alt": "Gabriele Radlinger, Rechtsanwältin bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 30310,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-18",
+    "url": "/images/anwalt-ingolstadt-maria-haneder.jpg",
+    "name": "anwalt-ingolstadt-maria-haneder.jpg",
+    "alt": "Maria Haneder, Rechtsanwältin bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 38018,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-19",
+    "url": "/images/anwalt-ingolstadt-eva-huxmann.jpg",
+    "name": "anwalt-ingolstadt-eva-huxmann.jpg",
+    "alt": "Eva Huxmann, Rechtsanwältin bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 74091,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-20",
+    "url": "/images/anwalt-ingolstadt-ulrike-wagner.jpg",
+    "name": "anwalt-ingolstadt-ulrike-wagner.jpg",
+    "alt": "Ulrike Wagner, Rechtsanwältin bei Hagn, Deckert, Stemmer & Partner in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 68182,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 0%"
+  },
+  {
+    "id": "original-21",
+    "url": "/images/ingolstadt-architektur-unsplash-dieter-k.jpg",
+    "name": "ingolstadt-architektur-unsplash-dieter-k.jpg",
+    "alt": "Architektur am Nordbahnhof in Ingolstadt",
+    "type": "image/jpeg",
+    "size": 250534,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-22",
+    "url": "/images/rechtsgebiete-documents-unsplash.webp",
+    "name": "rechtsgebiete-documents-unsplash.webp",
+    "alt": "Unterlagen, Stift und Taschenrechner – Symbolbild zu finanziellen Ansprüchen",
+    "type": "image/jpeg",
+    "size": 51202,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-23",
+    "url": "/images/rechtsgebiete-construction-unsplash.webp",
+    "name": "rechtsgebiete-construction-unsplash.webp",
+    "alt": "Baustelle mit Gerüst und Kran – Symbolbild zum privaten Baurecht",
+    "type": "image/jpeg",
+    "size": 276868,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-24",
+    "url": "/images/recht-ingolstadt-anwalt.jpg",
+    "name": "recht-ingolstadt-anwalt.jpg",
+    "alt": "Justitia-Figur in unserer Kanzlei",
+    "type": "image/jpeg",
+    "size": 46606,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  },
+  {
+    "id": "original-25",
+    "url": "/images/ingolstadt-anwalt-5.jpg",
+    "name": "ingolstadt-anwalt-5.jpg",
+    "alt": "Besprechungsbereich unserer Kanzlei",
+    "type": "image/jpeg",
+    "size": 45729,
+    "createdAt": "2026-10-20T11:00:00.000Z",
+    "position": "50% 50%"
+  }
+]

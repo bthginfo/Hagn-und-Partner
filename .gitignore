@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+.data/
+*.tsbuildinfo
+test-results/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+docs/source/*.html
+docs/source/*.txt
+

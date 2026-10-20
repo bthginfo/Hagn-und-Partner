@@ -1,0 +1,12 @@
+.git
+.next
+node_modules
+.data
+.agents
+.impeccable/review
+.impeccable/mocks
+.impeccable/questions
+docs/source
+.env*
+*.tsbuildinfo
+test-results

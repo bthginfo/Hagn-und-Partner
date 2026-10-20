@@ -1,0 +1,674 @@
+﻿/* PRINT ######################################################################################## */
+@media print {
+
+body {
+	background: none !important;
+	background-color: #fff !important;
+	color: #555 !important;
+}
+
+h1, h2, h3, h4, h5 {
+	color: #777 !important;
+}
+
+}
+
+
+
+/* BIG SCREEN #################################################################################### */
+@media screen and (min-width: 1281px) {
+
+}
+
+
+
+/* STANDARD VIEW ################################################################################# */
+@media screen and (max-width: 1280px) {
+
+}
+
+
+
+/* TABLET ####################################################################################### */
+
+@media screen and (max-width: 1050px) {
+
+/* ##### Hide / Show */
+
+#onepagenav,
+#header-wrapper,
+.submenu-inner.list3 .toolbar-info,
+#sidebar,
+.offer:last-child,
+#infocenter-icons.icons-4 .infocenter-icon:last-child,
+.footerbox-right {
+	display: none !important;
+}
+
+
+/* ##### Custom */
+
+h1, h2, .result-title {
+    font-size: 20px;
+    line-height: 22px;
+}
+
+#nav .logo {
+	left: 10px;
+	margin-top: 7px; 
+}
+
+#promos {
+    margin: -100px 15px 0 15px;
+    padding: 0 10px;
+    width: auto;
+}
+
+.promo {
+	width: 48%;
+}
+
+#map .map-info {
+    width: 30%;
+}
+
+#map .map-orte {
+    width: 70%;
+}
+
+.boxinfo {
+    padding: 1% 3% 2%;
+    width: 44%;
+}
+
+.boxinfo .recommend {
+    float: left;
+    width: 100%;
+}
+
+.offer {
+    width: 32%;
+}
+
+#infocenter-icons.icons-4 .infocenter-icon {
+    width: 30%;
+}
+
+.footerbox h3 span {
+	font-size: 12px;
+}
+
+#footerbox1 {
+    width: 47%;
+}
+
+#footerbox2 {
+    width: 47%;
+}
+
+.footerbox-left {
+    width: 100%;
+}
+
+footer .logo {
+    width: 65%;
+}
+
+.home-kontakt p {
+    font-size: 12px;
+}
+
+.homemenu .menu li.level_1 a {
+    font-size: 16px;
+}
+
+.homemenu ul.menu .submenu ul li a {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+p.anw-name {
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+p.anw-cred {
+    font-size: 11px;
+}
+
+p.anw-fon {
+    font-size: 12px;
+}
+
+p.anw-more {
+    font-size: 10px;
+}
+
+}
+
+
+
+/* TABLET QUER ################################################################################### */
+@media screen and (max-width: 820px) {
+
+/* ##### Hide / Show */
+.leaderboard,
+#promo-side,
+.nav2 .toolbar-info,
+.home-kontakt {
+    display: none !important;
+}
+
+
+
+/* Intro */
+
+
+
+
+Element {
+
+}
+#homenav ul.menu li.level_1 {
+    margin: 0 10px;
+}
+
+
+
+h1, h2, h3, h4, h5, h6 {
+	text-align: left;
+}
+
+h1, h2, .home h2, .result-title {
+    font-size: 18px;
+    line-height: 20px;
+}
+
+#nav {
+    height: 115px;
+}
+
+.promo {
+	margin: 0 2%;
+	width: 46%;
+}
+
+.offer {
+	margin: 0 2%;
+	margin-bottom: 20px;
+	width: 44%;
+}
+
+.offer:last-child {
+	display: inline-block !important;
+}
+
+#map .map-info, #map .map-orte {
+	float: none;
+    width: 100%;
+}
+
+#infocenter-icons.icons-4 .infocenter-icon:last-child {
+	display: inline-block !important;
+}
+
+#infocenter-icons.icons-4 .infocenter-icon {
+    width: 43%;
+}
+
+.cthin #content-wrapper {
+    padding-left: 20px;
+	padding-right: 20px;
+}
+
+.amazon {
+    margin: 0 2.5% !important;
+}
+
+#claim-footer {
+    font-size: 16px;
+}
+
+.gallery {
+    float: none;
+	margin: 0 0 20px 0;
+	width: 100%;
+}
+
+#infocenter-anfahrt {
+    width: 80%;
+}
+
+.square {
+    height: 20%;
+    width: 33.333333%;
+}
+
+#home {
+	height: 20%;
+    left: 33.3333%;
+    min-height: 20%;
+    width: 33.33333%;
+}
+
+#logo {
+    width: 60%;
+}
+
+#homenav {
+    left: 33.33333%;
+    height: 20%;
+    top: 70%;
+    width: 33.333333%;
+}
+
+.homemenu {
+    margin: 10% 0 0 0;
+}
+
+
+#square9 {
+	background: #fff url("../../images/ingolstadt-anwalt-5.jpg") no-repeat scroll center top;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-ms-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+
+.lbox, .mbox, .rbox {
+	clear: both;
+	margin: 0 10%;
+	width: 80%;
+}
+
+
+
+/* ########## Navigation */
+
+a.mobile-nav {
+	background: transparent url("../../images/menutab-mobile.png") no-repeat center center;
+	bottom: 5px;
+	color: #fff;
+	cursor: pointer;
+	display: block;
+	height: 50px;
+	line-height: 30px;
+	padding: 0;
+	position: absolute;
+	right: 15px;
+	text-align: center;
+	text-decoration: none;
+	top: 58px;
+	width: 50px;
+	z-index: 9999;
+}
+
+#toolbar-wrapper {
+	background: none !important;
+	top: 90px !important;
+}
+
+.toolbar {
+	background-color: #04446f;
+	clear: both;
+	display: block;
+	height: auto;
+	left: 0;
+	margin: 0;
+	position: absolute;
+	right: 0;
+	top: 15px;
+	-webkit-transition: all 0.7s ease-out;  
+	-moz-transition: all 0.7s ease-out;
+	-ms-transition: all 0.7s ease-out;
+	-o-transition: all 0.7s ease-out;
+	transition: all 0.7s ease-out;
+	width: 100%;
+	z-index: 9999;
+}
+
+.js .toolbar {
+	max-height: 0;
+	overflow: hidden;
+}
+
+.toolbar.active {
+	max-height: 1000px;
+	overflow: auto;
+}
+
+.toolbar ul.menu {
+	float: none !important;
+	height: auto !important;
+	padding: 0;
+	position: relative;
+	text-align: center;
+	width: 100%;
+}
+
+.toolbar ul.menu li.level_1,
+.toolbar ul.menu li.level_1.first,
+.toolbar ul.menu li.level_1.last {
+	background: none;
+	border: none;
+	border-bottom: 1px dashed #fff;
+	clear: both;
+	display: block;
+	float: none;
+	height: auto;
+	margin: 0;
+	min-height: 40px;
+    padding: 5px 0 0 0;
+    text-align: center;
+    text-transform: uppercase;
+	width: 100%;
+}
+
+.toolbar ul.menu li.level_1.last {
+	display: none;
+/*	border-bottom: none;
+	padding-bottom: 10px; */
+}
+
+.toolbar ul.menu li.level_1 a,
+.toolbar ul.menu li.level_1 a:hover,
+.toolbar ul.menu li.active a.level_1 {
+	background: none !important;
+	color: #fff !important;
+	font-size: 16px;
+	font-weight: normal;
+	height: 30px;
+	letter-spacing: 1px;
+	line-height: inherit;
+	margin: 0;
+    padding: 5px 0 0 0;
+    text-align: center;
+	text-decoration: none;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+.toolbar .submenu-wrapper {
+    padding: 0 0 10px 0;
+}
+
+.toolbar .submenu {
+	background: none !important;
+	border: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-ms-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
+	position: relative;
+	top: 0 !important;
+}
+
+.toolbar .submenu div.submenu-inner {
+    float: none;
+    width: 100%;
+}
+
+.toolbar .submenu .submenu-inner h3,
+.toolbar .submenu-inner div.toolbar-info {
+	display: none;
+}
+
+.toolbar .submenu ul {
+    border: none;
+    display: inline-block;
+    float: none;
+    width: 100%;
+}
+
+.toolbar .submenu-inner ul,
+.toolbar .submenu-inner.right ul {
+    padding: 0;
+}
+
+.toolbar ul.menu li.level_1 .submenu ul li {
+	height: 25px;
+	margin: 0 !important;
+    text-align: center;
+    width: 100%;
+}
+
+.toolbar ul.menu li.level_1.home,
+.toolbar .submenu .submenu-inner ul li.menulogo {
+	display: none;
+}
+
+.toolbar .submenu .submenu-inner ul li.subtitle h4 {
+	opacity: 0.58;
+	text-align: center;
+}
+
+.toolbar ul.menu li.level_1 .submenu ul li a,
+.toolbar ul.menu li.level_1 .submenu ul li a:hover {
+	color: #555;
+    font-size: 14px;
+    padding: 0;
+    text-align: center;
+}
+
+.toolbar ul.menu li.level_1 .submenu ul li a::before {
+	content: none;
+}
+
+
+
+}
+
+
+
+/* SMARTPHONE ##################################################################################### */
+@media screen and (max-width: 720px) {
+
+/* ##### Hide / Show */
+
+.promo-navs,
+.breadcrumbs,
+.footerbox h3,
+#splash,
+.boxwide,
+#header-image-overlay,
+#slidedescription,
+#prevslide,
+#nextslide,
+#thumb-tray,
+#progress-back,
+.offers,
+.getintouch-left h3 span,
+.getintouch-right,
+.toolbar ul.menu li.level_1 .submenu ul li.subtitle,
+#homenav,
+#headertitle,
+#intro {
+	display: none !important;
+}
+
+.promo:last-child {
+	display: block !important;
+}
+
+
+#nav {
+	top: 0 !important;
+}
+
+#nav .logo {
+    width: 250px !important;
+}
+
+#homeintro.section {
+    padding-top: 100px;
+}
+
+
+
+
+
+/* ##### Custom */
+
+body {
+	font-size: 12px;
+	line-height: 18px;
+	text-align: left;
+}
+
+p {
+	font-size: 12px;
+	line-height: 18px;
+	text-align: left;
+}
+
+h1, h2, .home h2, h3, .result-title {
+	background: none;
+    font-size: 16px;
+    letter-spacing: 0;
+    line-height: 18px;
+    margin: 0 0 10px 0 !important;
+    padding: 0 0 5spx 0 !important;
+}
+
+h3, h4 {
+    font-size: 14px;
+    letter-spacing: 0;
+}
+
+#homeband h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+header {
+    height: 200px;
+}
+
+.home header {
+    height: 250px;
+}
+
+#nav {
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-ms-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
+}
+
+#profil.section {
+    padding-top: 20px;
+}
+
+#nav .logo {
+    left: 10px;
+    margin-top: 12px;
+    width: 180px;
+}
+
+#headertitle {
+    top: -135px;
+}
+
+#headertitle h2 {
+    font-size: 20px;
+    letter-spacing: 3px;
+    padding: 10px 15px 10px 15px;
+}
+
+#maininfo {
+    padding-left: 10px;
+	padding-right: 10px;
+}
+
+#maininfo img.left,
+#maininfo .img-intro-left,
+#maininfo img.right,
+#maininfo .img-intro-right {
+	clear: both;
+	height: auto !important;
+	width: 100% !important;;
+}
+
+#infocenter {
+    padding: 0;
+}
+
+#infocenter-anfahrt {
+    width: 90%;
+}
+
+#infocenter-icons.icons-4 .infocenter-icon {
+    width: 80%;
+}
+
+.getintouch-left {
+	float: none;
+	width: 100%;
+}
+
+.getintouch-left h3 {
+	font-size: 26px;
+	padding-top: 10px;
+	text-align: center;
+}
+
+.getintouch-button {
+    font-size: 20px;
+}
+
+.offer {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.blogbox {
+	margin: 0;
+    width: 100%;
+}
+
+.lbox, .mbox, .rbox {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.amazon {
+    width: auto !important;
+}
+
+.kontakt-left,
+.kontakt-right {
+	clear: both;
+	display: inline-block;
+	float: none;
+	margin: 0 0 30px 0;
+	width: 100%;
+}
+
+#infocenter-icons.icons-4 .infocenter-icon {
+    width: 100%;
+}
+
+footer {
+    padding: 0 10px;
+}
+
+footer .logo {
+    width: 95%;
+}
+
+.footerbox-left,
+.footerbox-right {
+    float: none;
+    width: 100%;
+}
+
+#copyright ul.menu li.level_1 {
+	border: none; 
+}
+
+}

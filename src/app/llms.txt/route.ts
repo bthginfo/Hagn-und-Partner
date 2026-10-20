@@ -1,0 +1,4 @@
+import {canonicalUrl,publishedContent,pageUrl} from '@/lib/content';
+import {publicPages} from '@/lib/blog';
+export const revalidate=false;
+export async function GET(){const [site,base]=await Promise.all([publishedContent(),canonicalUrl()]);return new Response(`# ${site.config.legalName}\n\n${site.config.tagline}\n\n${site.config.address}, ${site.config.postalCode} ${site.config.city}\nTelefon: ${site.config.phone}\nE-Mail: ${site.config.email}\n\n## Inhalte\n\n${publicPages(site).filter(p=>!p.seo.noindex).map(p=>`- [${p.title}](${pageUrl(base,p.slug)}): ${p.seo.description}`).join('\n')}\n\nUnsere Inhalte dienen der allgemeinen Information und ersetzen keine Beratung zum Einzelfall. Eine Kontaktanfrage allein begründet kein Mandat.\n`,{headers:{'Content-Type':'text/plain; charset=utf-8','X-Content-Type-Options':'nosniff'}});}
