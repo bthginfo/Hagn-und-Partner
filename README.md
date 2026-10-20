@@ -56,7 +56,7 @@ Das Vercel-Projekt ist `hagn-und-partner`. Funktionen, Neon und Blob sind für F
 vercel deploy --prod
 ```
 
-Der Code ist auf `main` im GitHub-Repository gespeichert. Die automatische Git-Verknüpfung wird von Vercel derzeit wegen fehlenden Repository-Zugriffs seiner GitHub-Anbindung abgelehnt. Dafür muss die GitHub-Anbindung des Vercel-Kontos Zugriff auf `bthginfo/Hagn-und-Partner` erhalten. Bis dahin funktionieren Code-Deployments über den obigen CLI-Befehl. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website.
+Der Code ist auf `main` im GitHub-Repository gespeichert. Die automatische Git-Verknüpfung wartet auf die richtige Kontozuordnung: Vercel nennt `tuv-julius-voningelheim` als GitHub-Namensraum; das persönliche Repository gehört `bthginfo`. In den [Vercel-Kontoeinstellungen](https://vercel.com/account/settings/authentication) muss das Eigentümerkonto `bthginfo` verbunden sein. Die App-Freigabe „All repositories“ ersetzt diese Kontozuordnung nicht. Anschließend lässt sich das Repository unter **Projekteinstellungen → Git** verbinden. Bis dahin funktionieren Code-Deployments über den obigen CLI-Befehl. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website.
 
 Vor dem endgültigen Start die gewählte Gestaltung im CMS veröffentlichen, `NEXT_PUBLIC_DESIGN_REVIEW=false` setzen und erneut deployen. Dadurch verschwinden Umschalter und Entwurfs-Noindex. Die endgültige Domain unter **Einstellungen → Allgemein** eintragen. SMTP erst mit den tatsächlichen Zugangsdaten des Mailanbieters aktivieren.
 
