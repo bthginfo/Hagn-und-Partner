@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
-import { Check, ImagePlus, LoaderCircle, Upload, X } from "lucide-react";
+import { Check, ImagePlus, LoaderCircle, Maximize2, Upload, X } from "lucide-react";
 import type { ContentItem, ImagePosition, ImageValue, MediaAsset } from "@/lib/types";
 import { textWithBreaks } from "./text-wrap";
 
@@ -88,9 +88,9 @@ export function ContentLink({ href, editable, children, className = "", label, d
 const positions: ImagePosition[] = ["0% 0%", "50% 0%", "100% 0%", "0% 50%", "50% 50%", "100% 50%", "0% 100%", "50% 100%", "100% 100%"];
 const positionLabels = ["Oben links", "Oben mittig", "Oben rechts", "Mitte links", "Bildmitte", "Mitte rechts", "Unten links", "Unten mittig", "Unten rechts"];
 
-export function EditableImage({ image, editable, onChange, className = "", priority = false, sizes, caption = false }: {
+export function EditableImage({ image, editable, onChange, className = "", priority = false, sizes, caption = false, onOpen }: {
   image?: ImageValue; editable?: boolean; onChange?: (image: ImageValue) => void; className?: string;
-  priority?: boolean; sizes?: string; caption?: boolean;
+  priority?: boolean; sizes?: string; caption?: boolean; onOpen?: (button: HTMLButtonElement) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaAsset[]>([]);
@@ -153,6 +153,7 @@ export function EditableImage({ image, editable, onChange, className = "", prior
       style={{ objectPosition: current.position }} loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : undefined} decoding="async" sizes={sizes} />
       : <div className="hp-image-empty"><ImagePlus aria-hidden="true" /><span>Bild hinzufügen</span></div>}
+    {!editable && current.src && onOpen && <button type="button" className="hp-gallery-open-image" aria-label={`${current.alt || current.caption || "Bild"} – Großansicht öffnen`} aria-haspopup="dialog" onClick={event => { event.preventDefault(); event.stopPropagation(); onOpen(event.currentTarget); }}><span className="hp-gallery-open-cue" aria-hidden="true"><Maximize2 size={20} /></span></button>}
     {caption && current.caption && <figcaption>{current.caption}</figcaption>}
     {editable && <button type="button" className="hp-image-edit-button" aria-controls={panelId}
       onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpen(true); }}><ImagePlus size={16} /> Bild bearbeiten</button>}

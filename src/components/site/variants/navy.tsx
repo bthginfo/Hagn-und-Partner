@@ -1,5 +1,7 @@
 "use client";
 
+import { useGalleryLightbox } from '../gallery-lightbox';
+
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, Check, ChevronDown, Clock3, Info, Mail, MapPin, Maximize2, Menu, Phone, Plus, Quote, X } from "lucide-react";
 import type { ContentItem, SectionContent, SectionType } from "@/lib/types";
@@ -215,12 +217,9 @@ function NavyStats({ b }: InnerProps) {
 }
 
 function NavyGallery({ b, editable }: InnerProps) {
-  const images = b.c.images || []; const [active, setActive] = useState<number | null>(null); const dialogRef = useRef<HTMLDialogElement>(null); const opener = useRef<HTMLButtonElement | null>(null);
-  const index = active === null ? null : Math.min(active, Math.max(0, images.length - 1)); const image = index === null ? undefined : images[index];
-  useEffect(() => { const dialog = dialogRef.current; if (active !== null && dialog && !dialog.open) dialog.showModal(); if (active === null && dialog?.open) { dialog.close(); opener.current?.focus(); } }, [active]);
-  return <div className="nv-wrap nv-scene nv-gallery">{b.intro()}<div className="nv-gallery-grid">{images.map((entry, imageIndex) => <figure key={imageIndex} className="nv-gallery-tile"><EditableImage image={entry} editable={editable} className="nv-gallery-image" onChange={value => b.update("images", images.map((current, position) => position === imageIndex ? value : current))} />{!editable && <button type="button" className="nv-gallery-enlarge" aria-label={`${entry.alt || "Bild"} vergrößern`} onClick={event => { opener.current = event.currentTarget; setActive(imageIndex); }}><Maximize2 size={20} /></button>}{(entry.caption || editable) && <figcaption><EditableText as="span" value={entry.caption} editable={editable} onChange={value => b.update("images", images.map((current, position) => position === imageIndex ? { ...current, caption: value } : current))} /></figcaption>}</figure>)}</div>{b.actions()}
-    <dialog ref={dialogRef} className="nv-lightbox" aria-label="Bildergalerie" onCancel={() => setActive(null)} onClick={event => { if (event.target === event.currentTarget) setActive(null); }} onKeyDown={event => { if (!images.length || active === null) return; if (event.key === "ArrowRight") setActive((active + 1) % images.length); if (event.key === "ArrowLeft") setActive((active - 1 + images.length) % images.length); }}><button type="button" className="nv-lightbox-close" aria-label="Bildergalerie schließen" onClick={() => setActive(null)}><X size={26} /></button>{image && <div className="nv-lightbox-body"><img src={image.src} alt={image.alt} />{image.caption && <p>{image.caption}</p>}</div>}{images.length > 1 && <div className="nv-lightbox-controls"><button type="button" aria-label="Vorheriges Bild" onClick={() => setActive(((active || 0) - 1 + images.length) % images.length)}><ArrowLeft size={23} /></button><span>{(index || 0) + 1} / {images.length}</span><button type="button" aria-label="Nächstes Bild" onClick={() => setActive(((active || 0) + 1) % images.length)}><ArrowRight size={23} /></button></div>}</dialog>
-  </div>;
+  const images = b.c.images || [];
+  const gallery = useGalleryLightbox(images);
+  return <div className="nv-wrap nv-scene nv-gallery">{b.intro()}<div className="nv-gallery-grid">{images.map((entry, imageIndex) => <figure key={imageIndex} className="nv-gallery-tile"><EditableImage image={entry} editable={editable} className="nv-gallery-image" onOpen={button => gallery.openImage(imageIndex, button)} onChange={value => b.update("images", images.map((current, position) => position === imageIndex ? value : current))} />{(entry.caption || entry.alt || editable) && <figcaption><EditableText as="span" value={entry.caption || entry.alt} editable={editable} onChange={value => b.update("images", images.map((current, position) => position === imageIndex ? { ...current, caption: value } : current))} /></figcaption>}</figure>)}</div>{b.actions()}{!editable && gallery.lightbox}</div>;
 }
 
 function NavyRichtext({ b }: InnerProps) {

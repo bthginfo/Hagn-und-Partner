@@ -32,7 +32,7 @@ export function ContactForm({ editable = false }: { editable?: boolean }) {
       setStatus("success");
       form.reset();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.");
+      setError(reason instanceof TypeError ? "Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut." : reason instanceof Error ? reason.message : "Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.");
       setStatus("error");
     }
   }

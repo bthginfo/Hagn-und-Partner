@@ -1,7 +1,9 @@
 "use client";
 
+import { useGalleryLightbox } from '../gallery-lightbox';
+
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
-import { ArrowDown, ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, Check, ChevronDown, Info, Mail, Minus, Phone, Plus, X } from "lucide-react";
+import { ArrowDown, ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, Check, ChevronDown, Maximize2, Info, Mail, Minus, Phone, Plus, X } from "lucide-react";
 import type { ContentItem, ImageValue, SectionContent } from "@/lib/types";
 import { copyrightText, footerConfig } from "@/lib/site-config";
 import { ContentDisclosure, EditableChoice, ContentLink, EditableImage, EditableText, safeHref, teamEmailLabel } from "../editable";
@@ -259,6 +261,7 @@ function PeopleIndex({ editable, binding: b }: InnerProps) {
 
 function ImageCurtain({ editable, binding: b }: InnerProps) {
   const images = b.content.images?.length ? b.content.images : b.content.image ? [b.content.image] : [];
+  const gallery = useGalleryLightbox(images);
   const [frontIndex, setFrontIndex] = useState(1);
   const [reveal, setReveal] = useState(56);
   const current = Math.min(frontIndex, Math.max(0, images.length - 1));
@@ -267,7 +270,7 @@ function ImageCurtain({ editable, binding: b }: InnerProps) {
   const changeImage = (index: number, image: ImageValue) => b.content.images?.length ? b.update("images", b.content.images.map((entry, position) => position === index ? image : entry)) : b.update("image", image);
   return <div className="nr-gallery nr-container">{b.intro()}<div className={`nr-curtain${editable ? " nr-curtain--editing" : ""}`} style={{ "--nr-curtain": `${reveal}%` } as CSSProperties}>
     {editable ? <div className="nr-curtain-edit-images">{images.length ? images.map((image, index) => <div data-image-index={index} key={index}><EditableImage image={image} editable onChange={next => changeImage(index, next)} caption /></div>) : b.image(b.content.image, "nr-curtain-photo")}</div> : images.length > 0 && <><div className="nr-curtain-back"><EditableImage image={images[behind]} className="nr-curtain-photo" /></div>{images.length > 1 && <div className="nr-curtain-front" key={current}><EditableImage image={images[current]} className="nr-curtain-photo" /></div>}{images.length > 1 && <div className="nr-curtain-seam" aria-hidden="true"><span><ArrowLeft size={16} /><ArrowRight size={16} /></span></div>}<div className="nr-curtain-captions"><span>{images[current].caption || images[current].alt}</span>{images.length > 1 && <span>{images[behind].caption || images[behind].alt}</span>}</div></>}
-  </div>{!editable && images.length > 1 && <div className="nr-curtain-controls"><label htmlFor={`${id}-range`}>Bildansicht</label><input type="range" id={`${id}-range`} min={0} max={100} value={reveal} onChange={event => setReveal(Number(event.target.value))} aria-valuetext={`${images[current].alt}: ${reveal} Prozent sichtbar`} /><div className="nr-curtain-image-picker" role="group" aria-label="Fotografie auswählen">{images.map((image, index) => <button type="button" key={index} aria-label={`${serial(index + 1)} ${image.caption || image.alt || "Fotografie"}`} aria-pressed={current === index} onClick={() => { setFrontIndex(index); setReveal(56); }}>{serial(index + 1)}</button>)}</div></div>}{b.content.caption && b.text("caption", "p", "nr-gallery-caption")}{b.actions()}</div>;
+  {!editable && images.length > 0 && <button type="button" className="hp-gallery-open-image hp-gallery-open-image--curtain" aria-label={`${images[current].alt || "Bild"} – Großansicht öffnen`} aria-haspopup="dialog" onClick={event => gallery.openImage(current, event.currentTarget)}><span className="hp-gallery-open-cue" aria-hidden="true"><Maximize2 size={20} /></span></button>}</div>{!editable && images.length > 1 && <div className="nr-curtain-controls"><label htmlFor={`${id}-range`}>Bildansicht</label><input type="range" id={`${id}-range`} min={0} max={100} value={reveal} onChange={event => setReveal(Number(event.target.value))} aria-valuetext={`${images[current].alt}: ${reveal} Prozent sichtbar`} /><div className="nr-curtain-image-picker" role="group" aria-label="Fotografie auswählen">{images.map((image, index) => <button type="button" key={index} aria-label={`${serial(index + 1)} ${image.caption || image.alt || "Fotografie"}`} aria-pressed={current === index} onClick={() => { setFrontIndex(index); setReveal(56); }}>{serial(index + 1)}</button>)}</div></div>}{b.content.caption && b.text("caption", "p", "nr-gallery-caption")}{b.actions()}{!editable && gallery.lightbox}</div>;
 }
 
 function MeasuredProcess({ binding: b }: InnerProps) {

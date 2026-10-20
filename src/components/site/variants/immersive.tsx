@@ -1,5 +1,7 @@
 "use client";
 
+import { useGalleryLightbox } from '../gallery-lightbox';
+
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, Check, ChevronDown, Mail, MapPin, Minus, Phone, Plus, Search, X } from "lucide-react";
 import type { ContentItem, Section, SectionContent } from "@/lib/types";
@@ -137,5 +139,6 @@ function CinematicSplit({ editable, section, binding: b }: InnerProps) {
 }
 
 function CinematicGallery({ editable, binding: b }: InnerProps) {
-  return <div className="iv-gallery iv-container"><div className="iv-gallery-intro">{b.text("heading", "h2", "iv-heading")}<div>{b.text("text", "p", "iv-body-copy")}{b.content.subheading && b.text("subheading", "p", "iv-subheading")}</div></div><div className="iv-gallery-images">{(b.content.images || []).map((image, index) => <EditableImage key={index} image={image} editable={editable} caption onChange={value => b.update("images", b.content.images!.map((entry, position) => position === index ? value : entry))} className="iv-gallery-image" />)}</div>{b.actions()}</div>;
+  const gallery = useGalleryLightbox(b.content.images || []);
+  return <div className="iv-gallery iv-container"><div className="iv-gallery-intro">{b.text("heading", "h2", "iv-heading")}<div>{b.text("text", "p", "iv-body-copy")}{b.content.subheading && b.text("subheading", "p", "iv-subheading")}</div></div><div className="iv-gallery-images">{(b.content.images || []).map((image, index) => <EditableImage key={index} image={image} editable={editable} caption onOpen={button => gallery.openImage(index, button)} onChange={value => b.update("images", b.content.images!.map((entry, position) => position === index ? value : entry))} className="iv-gallery-image" />)}</div>{b.actions()}{!editable && gallery.lightbox}</div>;
 }

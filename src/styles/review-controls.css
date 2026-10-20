@@ -1,0 +1,4 @@
+/* Keep the fixed design chooser clear of legal links and cookie controls. */
+.hp-site:has(.hp-review-fab) :is(.hp-footer,.ed-footer,.iv-footer,.nr-footer,.nv-footer) {
+  padding-bottom:calc(104px + env(safe-area-inset-bottom,0px));
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useGalleryLightbox } from './gallery-lightbox';
+
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowDown, ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, BriefcaseBusiness, Building2, CalendarDays, Check, ChevronDown, Clock3, FileText, HeartHandshake, House, Info, Mail, MapPin, Menu, Minus, Phone, Plus, ShieldCheck, UsersRound, X } from "lucide-react";
 import type { ContentItem, ImageValue, MediaAsset, PageContent, Section, SectionContent, SiteConfig } from "@/lib/types";
@@ -39,22 +41,24 @@ export function SiteView({ page, site, editable = false, selectedSectionId, onSe
   useEffect(() => {
     if (editable) return;
     const root = rootRef.current;
-    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("hp-in-view"); observer.unobserve(entry.target); } });
+    if (!root) return;
+    const observer: IntersectionObserver | null = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? null : new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("hp-in-view"); observer?.unobserve(entry.target); } });
     }, { threshold: .12 });
-    root.querySelectorAll("[data-hp-reveal]").forEach((node) => observer.observe(node));
+    root.querySelectorAll("[data-hp-reveal]").forEach((node) => observer?.observe(node));
     const scrollToAnchor = (event: MouseEvent) => {
       const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
       if (!link || link.hash.length < 2) return;
       const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
       if (!target || !root.contains(target)) return;
       event.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      if (link.hash === "#hauptinhalt" && link.closest("footer")) window.scrollTo({ top: 0, behavior });
+      else target.scrollIntoView({ behavior, block: "start" });
       if (target.hasAttribute("tabindex")) target.focus({ preventScroll: true });
     };
     root.addEventListener("click", scrollToAnchor);
-    return () => { observer.disconnect(); root.removeEventListener("click", scrollToAnchor); };
+    return () => { observer?.disconnect(); root.removeEventListener("click", scrollToAnchor); };
   }, [page.id, editable, activeVariant]);
   const palette = paletteFor(site, activeVariant);
   const paletteOverride = Boolean(site.theme.palettes?.[activeVariant]);
@@ -132,6 +136,7 @@ export function SectionRenderer({ section, site, editable = false, selected, onS
   const teamGridRef = useRef<HTMLDivElement>(null);
   const [teamIndex, setTeamIndex] = useState(0);
   const headingLevel = useSectionHeadingLevel(section.id);
+  const gallery = useGalleryLightbox(c.images ?? []);
   if (["blog-cards", "blog-editorial", "blog-list"].includes(section.type)) return <BlogFeed section={section} site={site} editable={editable} selected={selected} onSelect={onSelect} onChange={onChange} />;
   if (["navy-hero", "navy-bento", "navy-service-tabs", "navy-people", "navy-process", "navy-contact"].includes(section.type)) return <NavySection section={section} site={site} editable={editable} selected={selected} onSelect={onSelect} onChange={onChange} portraits={portraits} sceneImage={sceneImage} />;
   if (["noir-hero", "case-deck", "people-index", "image-curtain", "noir-manifesto", "noir-contact"].includes(section.type)) return <NoirSection section={section} site={site} editable={editable} selected={selected} onSelect={onSelect} onChange={onChange} portraits={portraits} />;
@@ -187,7 +192,7 @@ export function SectionRenderer({ section, site, editable = false, selected, onS
     case "faq": case "accordion": body = <div className="hp-faq-layout"><div>{heading()}{text("text", "p", "hp-section-text")}{actions()}</div><div className="hp-faq-list">{items.map((item, index) => <ContentDisclosure editable={editable} key={item.id} data-item-id={item.id} className="hp-faq-item" summary={<>{itemText(item, index, "title", "h3")}<span className="hp-disclosure-icon"><Plus size={21} /><Minus size={21} /></span></>}><div className="hp-faq-answer">{itemText(item, index, "text")}{details(item, index)}{item.href && <ContentLink href={item.href} editable={editable} className="hp-inline-link">{item.label || "Mehr erfahren"}<ArrowUpRight size={15} /></ContentLink>}</div></ContentDisclosure>)}</div></div>; break;
     case "steps": body = <>{intro()}<ol className="hp-steps">{items.map((item, index) => <li key={item.id} data-item-id={item.id}><span className="hp-step-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><div>{itemText(item, index, "title", "h3")}{itemText(item, index, "text")}{details(item, index)}</div></li>)}</ol>{actions("hp-section-bottom-actions")}</>; break;
     case "stats": body = <>{intro()}<dl className="hp-stats">{items.map((item, index) => <div key={item.id} data-item-id={item.id}><dt>{itemText(item, index, "text", "span")}</dt><dd>{itemText(item, index, "title", "span")}</dd>{item.meta && itemText(item, index, "meta", "p")}</div>)}</dl></>; break;
-    case "gallery": body = <>{intro()}<div className="hp-gallery">{(c.images ?? []).map((entry, index) => <EditableImage key={index} image={entry} editable={editable} className="hp-gallery-image" caption onChange={(value) => update("images", c.images!.map((current, i) => index === i ? value : current))} />)}</div>{actions()}</>; break;
+    case "gallery": body = <>{intro()}<div className="hp-gallery">{(c.images ?? []).map((entry, index) => <EditableImage key={index} image={entry} editable={editable} className="hp-gallery-image" caption onOpen={button => gallery.openImage(index, button)} onChange={(value) => update("images", c.images!.map((current, i) => index === i ? value : current))} />)}</div>{actions()}{!editable && gallery.lightbox}</>; break;
     case "richtext": body = <div className="hp-richtext"><header className="hp-richtext-header">{heading()}{c.subheading && text("subheading", "p", "hp-section-subheading")}{c.image && image("hp-richtext-image")}{actions()}</header><div className="hp-richtext-reading">{text("text", "div", "hp-richtext-body")}{items.map((item, index) => <article key={item.id} data-item-id={item.id} className="hp-richtext-block">{itemText(item, index, "title", "h3")}{itemText(item, index, "text", "p")}{details(item, index)}{item.href && <ContentLink href={item.href} editable={editable} className="hp-inline-link">{item.label || item.href}<ArrowUpRight size={16} /></ContentLink>}</article>)}</div></div>; break;
     case "cta": body = <div className="hp-cta-layout"><div>{heading("hp-cta-heading")}{text("text", "p", "hp-cta-text")}</div>{actions("hp-cta-actions")}</div>; break;
     case "cards": body = <>{intro()}<div className="hp-editorial-cards">{items.map((item, index) => <article key={item.id} data-item-id={item.id} className="hp-editorial-card">{item.image ? itemImage(item, index) : <span className="hp-editorial-card-icon"><ContentIcon name={item.icon} size={29} editable={editable} itemId={item.id} sectionId={section.id} /></span>}{itemText(item, index, "meta", "span", "hp-card-meta")}{itemText(item, index, "title", "h3")}{itemText(item, index, "text")}{details(item, index)}{item.href && <ContentLink href={item.href} editable={editable} className="hp-inline-link">{item.label || "Weiterlesen"}<ArrowUpRight size={18} /></ContentLink>}</article>)}</div>{actions()}</>; break;
