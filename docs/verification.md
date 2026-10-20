@@ -59,4 +59,10 @@ Der Design-Detektor wurde einmal ausgeführt. Seine fünf primären Hinweise bez
 
 Das Vercel-Projekt ist `hagn-und-partner`. Die Funktionsregion ist in `vercel.json` auf Frankfurt (`fra1`) begrenzt. Neon und der öffentliche Blob-Store wurden ebenfalls in Frankfurt angelegt. Eine Build- oder Sandbox-Region ist davon unabhängig.
 
+Bereitgestellt und erreichbar unter [hagn-und-partner.vercel.app](https://hagn-und-partner.vercel.app), Verwaltung unter [/admin](https://hagn-und-partner.vercel.app/admin). Der Vercel-Build einschließlich TypeScript und aller 36 statischen Ausgaben lief erfolgreich. Die tatsächlichen Deployment-Ausgaben bestätigen `deployedTo: ["fra1"]`, insbesondere für Verwaltung, Kontakt und Bereinigung. Die öffentliche Startseite und die Anmeldung antworten mit HTTP 200, der ungeschützte Bootstrap mit 401 und der deaktivierte Blog mit 404.
+
+Die sechzehn Integrationsprüfungen wurden zusätzlich vollständig gegen diese HTTPS-Bereitstellung bestanden. Das Sitzungscookie trägt dort auch `Secure`. Echte Blob-Uploads, Kontaktanfragen, Seiten- und Blogveröffentlichung sowie Cache-Erneuerung funktionierten; ursprüngliche Inhalte wurden wiederhergestellt und sämtliche Testdaten entfernt. Es wurden keine E-Mails versendet.
+
+Der erste Code-Push auf GitHub war erfolgreich. Die optionale automatische Verbindung zum Repository wird vom Vercel-Konto mit fehlendem Admin-/Schreibzugriff seiner GitHub-Anbindung abgelehnt. Manuelle CLI-Deployments sind erfolgreich; diese fehlende Git-Verknüpfung betrifft keine Veröffentlichung aus dem CMS.
+
 Der Entwurfsbetrieb verwendet `NEXT_PUBLIC_DESIGN_REVIEW=true`: Der Umschalter ist sichtbar, Suchmaschinen erhalten Noindex und eine gesperrte `robots.txt`. Der endgültige Start benötigt die gewählte Gestaltung, die endgültige kanonische Domain, eine erneute Bereitstellung mit ausgeschaltetem Entwurfsmodus und die tatsächlichen SMTP-Einstellungen, falls Benachrichtigungen gewünscht sind.

@@ -2,6 +2,8 @@
 
 Website und visuelle Inhaltsverwaltung für Hagn, Deckert, Stemmer & Partner PartG mbB in Ingolstadt. Next.js App Router, React, TypeScript, Neon Postgres und Vercel Blob. Öffentliche Seiten werden vorgerendert und gezielt nach einer Veröffentlichung erneuert.
 
+[Entwurfswebsite](https://hagn-und-partner.vercel.app) · [Verwaltung](https://hagn-und-partner.vercel.app/admin)
+
 ## Website und Verwaltung
 
 - Fünf eigenständige Entwürfe, vorübergehend umschaltbar über den Button rechts unten. Auswahl über `?design=1` bis `?design=5`.
@@ -53,6 +55,8 @@ Das Vercel-Projekt ist `hagn-und-partner`. Funktionen, Neon und Blob sind für F
 ```powershell
 vercel deploy --prod
 ```
+
+Der Code ist auf `main` im GitHub-Repository gespeichert. Die automatische Git-Verknüpfung wird von Vercel derzeit wegen fehlenden Repository-Zugriffs seiner GitHub-Anbindung abgelehnt. Dafür muss die GitHub-Anbindung des Vercel-Kontos Zugriff auf `bthginfo/Hagn-und-Partner` erhalten. Bis dahin funktionieren Code-Deployments über den obigen CLI-Befehl. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website.
 
 Vor dem endgültigen Start die gewählte Gestaltung im CMS veröffentlichen, `NEXT_PUBLIC_DESIGN_REVIEW=false` setzen und erneut deployen. Dadurch verschwinden Umschalter und Entwurfs-Noindex. Die endgültige Domain unter **Einstellungen → Allgemein** eintragen. SMTP erst mit den tatsächlichen Zugangsdaten des Mailanbieters aktivieren.
 

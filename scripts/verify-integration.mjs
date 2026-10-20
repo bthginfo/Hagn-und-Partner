@@ -29,7 +29,7 @@ try{
   assert.equal((await request('/api/admin/login',{method:'POST',body:{password:'incorrect-'+randomUUID()},auth:false,origin:'https://untrusted.invalid'})).status,403);mark('Cross-origin mutations are rejected');
   const logged=await request('/api/admin/login',{method:'POST',body:{password},auth:false});assert.equal(logged.status,200,'Administrator login');
   cookie=(logged.response.headers.get('set-cookie')||'').split(';')[0];assert(cookie.startsWith('hp_admin_session='));
-  assert(/httponly/i.test(logged.response.headers.get('set-cookie')));assert(/samesite=strict/i.test(logged.response.headers.get('set-cookie')));mark('Password login creates a protected session');
+  assert(/httponly/i.test(logged.response.headers.get('set-cookie')));assert(/samesite=strict/i.test(logged.response.headers.get('set-cookie')));if(base.startsWith('https://'))assert(/;\s*secure/i.test(logged.response.headers.get('set-cookie')));mark('Password login creates a protected session');
   const bootstrap=await request('/api/admin/bootstrap');assert.equal(bootstrap.status,200);current=bootstrap.data.state;original=structuredClone(current);
   assert.equal(bootstrap.data.settings.smtp.enabled,false,'Integration verification requires SMTP disabled to avoid external mail');
   assert.equal(bootstrap.data.settings.smtp.password,undefined);assert(bootstrap.data.media.length);mark('Database, inquiry inbox and shared media bootstrap together without secrets');
