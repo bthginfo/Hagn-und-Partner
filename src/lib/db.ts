@@ -1,10 +1,12 @@
 import 'server-only';
 import { neon } from '@neondatabase/serverless';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { CmsState, Inquiry, MediaAsset, Revision, SiteSettings, WebsiteContent } from './types';
 import { seedContent, seedMedia } from '@/data/seed';
+import { useRemoteDatabase } from './database-policy';
+import { projectPublicContent } from './public-projection';
 
 export class AppError extends Error { constructor(message:string, public status=400){super(message);} }
 type Row=Record<string,unknown>;
@@ -12,19 +14,24 @@ type RecordData=Record<string,unknown>;
 interface LocalStore {state:CmsState; records:Record<string,unknown>}
 let initialized:Promise<void>|undefined;
 let migration:Promise<void>|undefined;
-const metrics=globalThis as typeof globalThis & {hpQueryCount?:number};
+const metrics=globalThis as typeof globalThis & {hpQueryCount?:number;hpQueryBytes?:number};
 const blockedUntil=new Map<string,number>();
 let localQueue:Promise<unknown>=Promise.resolve();
 const directory=path.join(process.cwd(),'.data');
 const localPath=path.join(directory,'cms.json');
-const sql=process.env.DATABASE_URL?neon(process.env.DATABASE_URL):null;
+const sql=useRemoteDatabase(process.env)?neon(process.env.DATABASE_URL!):null;
+const databaseIdentity=sql?new URL(process.env.DATABASE_URL!):null;
+export const databaseCacheNamespace=databaseIdentity?createHash('sha256').update([databaseIdentity.hostname,databaseIdentity.pathname,databaseIdentity.username].join('|')).digest('hex').slice(0,20):'local-files';
 
 export const defaultSettings:SiteSettings={smtp:{enabled:false,host:'',port:465,secure:true,user:'',from:'info@hagn-partner.de',to:'info@hagn-partner.de',password:''},retentionDays:365,onboardingComplete:false,siteUrl:process.env.NEXT_PUBLIC_SITE_URL||'http://localhost:3000',storageRegion:'fra1',databaseRegion:'fra1'};
 export function databaseConfigured(){return Boolean(sql);}
-async function query(statement:string,parameters:unknown[]=[]):Promise<Row[]>{
+async function query(statement:string,parameters:unknown[]=[],operation='database.query'):Promise<Row[]>{
   if(!sql)throw new AppError('Die Datenbank ist noch nicht eingerichtet.',503);
-  if(process.env.HP_DB_DIAGNOSTICS==='1')metrics.hpQueryCount=(metrics.hpQueryCount||0)+1;
-  return await sql.query(statement,parameters) as Row[];
+  const measured=process.env.HP_DB_DIAGNOSTICS==='1'||process.env.HP_DB_METRICS==='1';
+  const started=measured?performance.now():0;
+  const rows=await sql.query(statement,parameters) as Row[];
+  if(measured){const bytes=Buffer.byteLength(JSON.stringify(rows));metrics.hpQueryCount=(metrics.hpQueryCount||0)+1;metrics.hpQueryBytes=(metrics.hpQueryBytes||0)+bytes;if(process.env.HP_DB_METRICS==='1')console.info(JSON.stringify({event:'hp.database',operation,rows:rows.length,logicalBytes:bytes,durationMs:Math.round(performance.now()-started)}));}
+  return rows;
 }
 function newState():CmsState{return{draft:structuredClone(seedContent),published:structuredClone(seedContent),revision:1,updatedAt:new Date().toISOString(),publishedAt:new Date().toISOString(),revisions:[]};}
 async function readLocal():Promise<LocalStore>{
@@ -59,23 +66,31 @@ export async function setupDatabase():Promise<void>{
   return migration;
 }
 const iso=(value:unknown)=>new Date(value as string).toISOString();
-function stateFromRow(row:Row,revisions:Revision[]):CmsState{return{draft:row.draft as WebsiteContent,published:row.published as WebsiteContent,revision:Number(row.revision),updatedAt:iso(row.updated_at),publishedAt:row.published_at?iso(row.published_at):null,revisions};}
+function stateFromRow(row:Row,revisions:Revision[]):CmsState{return{draft:row.draft as WebsiteContent,published:row.same_snapshot?structuredClone(row.draft as WebsiteContent):row.published as WebsiteContent,revision:Number(row.revision),updatedAt:iso(row.updated_at),publishedAt:row.published_at?iso(row.published_at):null,revisions};}
 const revisionsQuery=`(SELECT COALESCE(jsonb_agg(r ORDER BY r.created_at DESC),'[]'::jsonb) FROM (SELECT id,label,created_at FROM hp_revisions ORDER BY created_at DESC LIMIT 30) r)`;
 function rowRevisions(row:Row):Revision[]{return ((row.revisions||[]) as Row[]).map(r=>({id:String(r.id),label:String(r.label),createdAt:iso(r.created_at)}));}
-export async function getState():Promise<CmsState>{await initialize();if(!sql)return structuredClone((await readLocal()).state);const rows=await query(`SELECT *,${revisionsQuery} AS revisions FROM hp_site WHERE id='main'`);return stateFromRow(rows[0],rowRevisions(rows[0]));}
+export async function getState():Promise<CmsState>{await initialize();if(!sql)return structuredClone((await readLocal()).state);const rows=await query(`SELECT draft,CASE WHEN draft=published THEN NULL ELSE published END AS published,draft=published AS same_snapshot,revision,updated_at,published_at,${revisionsQuery} AS revisions FROM hp_site WHERE id='main'`,[],'admin.state');return stateFromRow(rows[0],rowRevisions(rows[0]));}
 export async function getPublished():Promise<WebsiteContent>{await initialize();if(!sql)return structuredClone((await readLocal()).state.published);const rows=await query(`SELECT published FROM hp_site WHERE id='main'`);return rows[0].published as WebsiteContent;}
-export async function getPublicSnapshot():Promise<{content:WebsiteContent;siteUrl:string}>{await initialize();if(!sql)return{content:(await readLocal()).state.published,siteUrl:(await getSettings()).siteUrl};const rows=await query(`SELECT published,COALESCE((SELECT data->>'siteUrl' FROM hp_records WHERE collection='settings' AND id='site'),$1) AS site_url FROM hp_site WHERE id='main'`,[defaultSettings.siteUrl]);return{content:rows[0].published as WebsiteContent,siteUrl:String(rows[0].site_url)};}
+export async function getPublicSnapshot(slug?:string):Promise<{content:WebsiteContent;siteUrl:string}>{
+  await initialize();if(!sql)return{content:projectPublicContent((await readLocal()).state.published,slug),siteUrl:(await getSettings()).siteUrl};
+  const rows=await query(`SELECT jsonb_build_object('version',1,'config',s.published->'config',
+    'pages',COALESCE((SELECT jsonb_agg(CASE WHEN $1::text IS NULL THEN (p.value-'sections')||'{"sections":[]}'::jsonb ELSE p.value END ORDER BY p.position) FROM jsonb_array_elements(s.published->'pages') WITH ORDINALITY AS p(value,position) WHERE $1::text IS NULL OR p.value->>'slug'=$1),'[]'::jsonb),
+    'posts',CASE WHEN s.published#>>'{config,blog,enabled}'='true' THEN COALESCE((SELECT jsonb_agg((p.value-'sections')||jsonb_build_object('sections',CASE WHEN $1::text=COALESCE(s.published#>>'{config,blog,slug}','blog')||'/'||(p.value->>'slug') THEN COALESCE(p.value->'sections','[]'::jsonb) ELSE '[]'::jsonb END) ORDER BY p.position) FROM jsonb_array_elements(COALESCE(s.published->'posts','[]'::jsonb)) WITH ORDINALITY AS p(value,position) WHERE p.value->>'status'='published'),'[]'::jsonb) ELSE '[]'::jsonb END) AS content,
+    COALESCE((SELECT data->>'siteUrl' FROM hp_records WHERE collection='settings' AND id='site'),$2) AS site_url FROM hp_site s WHERE id='main'`,[slug??null,defaultSettings.siteUrl],slug===undefined?'public.index':'public.page');
+  if(!rows[0])throw new AppError('Es sind noch keine veröffentlichten Inhalte vorhanden.',503);
+  return{content:rows[0].content as WebsiteContent,siteUrl:String(rows[0].site_url)};
+}
 export async function saveDraft(content:WebsiteContent,revision:number):Promise<CmsState>{
   await initialize();
   if(!sql){await withLocal(store=>{if(store.state.revision!==revision)throw new AppError('Der Entwurf wurde inzwischen geändert. Bitte laden Sie die aktuelle Version neu.',409);store.state.draft=structuredClone(content);store.state.updatedAt=new Date().toISOString();store.state.revision++;});}
-  else {const rows=await query(`UPDATE hp_site SET draft=$1::jsonb,revision=revision+1,updated_at=now() WHERE id='main' AND revision=$2 RETURNING *,${revisionsQuery} AS revisions`,[JSON.stringify(content),revision]);if(!rows.length)throw new AppError('Der Entwurf wurde inzwischen geändert. Bitte laden Sie die aktuelle Version neu.',409);return stateFromRow(rows[0],rowRevisions(rows[0]));}
+  else {const rows=await query(`UPDATE hp_site SET draft=$1::jsonb,revision=revision+1,updated_at=now() WHERE id='main' AND revision=$2 RETURNING CASE WHEN draft=published THEN NULL ELSE published END AS published,draft=published AS same_snapshot,revision,updated_at,published_at,${revisionsQuery} AS revisions`,[JSON.stringify(content),revision],'admin.save');if(!rows.length)throw new AppError('Der Entwurf wurde inzwischen geändert. Bitte laden Sie die aktuelle Version neu.',409);return stateFromRow({...rows[0],draft:content},rowRevisions(rows[0]));}
   return getState();
 }
 export async function publish(revision:number):Promise<CmsState>{
   await initialize();const id=randomUUID();const label='Veröffentlichung';
   if(!sql){await withLocal(store=>{if(store.state.revision!==revision)throw new AppError('Bitte speichern oder laden Sie zunächst den aktuellen Entwurf.',409);store.state.published=structuredClone(store.state.draft);store.state.publishedAt=new Date().toISOString();store.state.updatedAt=new Date().toISOString();store.state.revision++;store.state.revisions.unshift({id,label,createdAt:new Date().toISOString(),content:structuredClone(store.state.published)});store.state.revisions=store.state.revisions.slice(0,30);});}
   else {
-    const rows=await query(`WITH saved AS (UPDATE hp_site SET published=draft,published_at=now(),updated_at=now(),revision=revision+1 WHERE id='main' AND revision=$1 RETURNING *), history AS (INSERT INTO hp_revisions(id,content,label) SELECT $2,published,$3 FROM saved RETURNING id) SELECT saved.* FROM saved CROSS JOIN history`,[revision,id,label]);
+    const rows=await query(`WITH saved AS (UPDATE hp_site SET published=draft,published_at=now(),updated_at=now(),revision=revision+1 WHERE id='main' AND revision=$1 RETURNING revision,published), history AS (INSERT INTO hp_revisions(id,content,label) SELECT $2,published,$3 FROM saved RETURNING id) SELECT saved.revision FROM saved CROSS JOIN history`,[revision,id,label],'admin.publish');
     if(!rows.length)throw new AppError('Bitte speichern oder laden Sie zunächst den aktuellen Entwurf.',409);
     await query(`DELETE FROM hp_revisions WHERE id NOT IN (SELECT id FROM hp_revisions ORDER BY created_at DESC LIMIT 30)`);
   }
@@ -121,18 +136,18 @@ export async function dailyCleanup():Promise<void>{
 export async function getAdminSnapshot():Promise<{state:CmsState;settings:SiteSettings;media:MediaAsset[];inquiries:Inquiry[]}>{
   await initialize();
   if(!sql){const [state,settings,media,inquiries]=await Promise.all([getState(),getSettings(),listMedia(),listInquiries()]);return{state,settings,media,inquiries};}
-  const rows=await query(`SELECT s.*,${revisionsQuery} AS revisions,
+  const rows=await query(`SELECT s.draft,CASE WHEN s.draft=s.published THEN NULL ELSE s.published END AS published,s.draft=s.published AS same_snapshot,s.revision,s.updated_at,s.published_at,${revisionsQuery} AS revisions,
     (SELECT data FROM hp_records WHERE collection='settings' AND id='site') AS settings,
     COALESCE((SELECT jsonb_agg(data ORDER BY created_at DESC) FROM hp_records WHERE collection='media'),'[]'::jsonb) AS media,
     COALESCE((SELECT jsonb_agg(q.data ORDER BY q.created_at DESC) FROM (SELECT data,created_at FROM hp_records WHERE collection='inquiries' AND created_at >= now()-COALESCE((SELECT (data->>'retentionDays')::integer FROM hp_records WHERE collection='settings' AND id='site'),365)*interval '1 day' ORDER BY created_at DESC LIMIT 3000) q),'[]'::jsonb) AS inquiries
-    FROM hp_site s WHERE id='main'`);
+    FROM hp_site s WHERE id='main'`,[],'admin.bootstrap');
   const row=rows[0];return{state:stateFromRow(row,rowRevisions(row)),settings:(row.settings as SiteSettings)||structuredClone(defaultSettings),media:row.media as MediaAsset[],inquiries:row.inquiries as Inquiry[]};
 }
 export function getQueryCount(){return metrics.hpQueryCount||0;}
 export async function saveSnapshots(draft:WebsiteContent,published:WebsiteContent,revision:number,label:string):Promise<CmsState>{
   await initialize();const id=randomUUID();
   if(!sql){await withLocal(store=>{if(store.state.revision!==revision)throw new AppError('Der Entwurf wurde inzwischen geändert. Bitte laden Sie die aktuelle Version neu.',409);store.state.draft=structuredClone(draft);store.state.published=structuredClone(published);store.state.revision++;store.state.updatedAt=new Date().toISOString();store.state.publishedAt=store.state.updatedAt;store.state.revisions.unshift({id,label,createdAt:store.state.updatedAt,content:structuredClone(published)});store.state.revisions=store.state.revisions.slice(0,30);});return getState();}
-  const rows=await query(`WITH saved AS (UPDATE hp_site SET draft=$1::jsonb,published=$2::jsonb,revision=revision+1,updated_at=now(),published_at=now() WHERE id='main' AND revision=$3 RETURNING *), history AS (INSERT INTO hp_revisions(id,content,label) SELECT $4,published,$5 FROM saved RETURNING id) SELECT saved.* FROM saved CROSS JOIN history`,[JSON.stringify(draft),JSON.stringify(published),revision,id,label]);
+  const rows=await query(`WITH saved AS (UPDATE hp_site SET draft=$1::jsonb,published=$2::jsonb,revision=revision+1,updated_at=now(),published_at=now() WHERE id='main' AND revision=$3 RETURNING revision,published), history AS (INSERT INTO hp_revisions(id,content,label) SELECT $4,published,$5 FROM saved RETURNING id) SELECT saved.revision FROM saved CROSS JOIN history`,[JSON.stringify(draft),JSON.stringify(published),revision,id,label],'admin.publish-post');
   if(!rows.length)throw new AppError('Der Entwurf wurde inzwischen geändert. Bitte laden Sie die aktuelle Version neu.',409);
   await query(`DELETE FROM hp_revisions WHERE id NOT IN (SELECT id FROM hp_revisions ORDER BY created_at DESC LIMIT 30)`);return getState();
 }

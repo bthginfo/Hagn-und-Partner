@@ -1,8 +1,13 @@
 import 'server-only';
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import { getPublicSnapshot } from './db';
-const publicSnapshot=unstable_cache(getPublicSnapshot,['hp-public-snapshot-v1'],{tags:['hp-published'],revalidate:false});
-export const publishedContent=cache(async()=>(await publicSnapshot()).content);
-export const canonicalUrl=cache(async()=>(await publicSnapshot()).siteUrl.replace(/\/$/,''));
+import { databaseCacheNamespace,getPublicSnapshot } from './db';
+import {packPublicSnapshot,unpackPublicSnapshot} from './public-projection';
+type Snapshot=Awaited<ReturnType<typeof getPublicSnapshot>>;
+const indexCache=unstable_cache(async()=>packPublicSnapshot(await getPublicSnapshot()),['hp-public-index-v2',databaseCacheNamespace],{tags:['hp-published'],revalidate:false});
+const pageCache=unstable_cache(async(slug:string)=>packPublicSnapshot(await getPublicSnapshot(slug)),['hp-public-page-v2',databaseCacheNamespace],{tags:['hp-published'],revalidate:false});
+const publicIndex=cache(async()=>unpackPublicSnapshot<Snapshot>(await indexCache()));
+export const publicPageSnapshot=cache(async(slug:string)=>{const snapshot=unpackPublicSnapshot<Snapshot>(await pageCache(slug));return{...snapshot,siteUrl:snapshot.siteUrl.replace(/\/$/,'')};});
+export const publishedContent=cache(async()=>(await publicIndex()).content);
+export const canonicalUrl=cache(async()=>(await publicIndex()).siteUrl.replace(/\/$/,''));
 export const pageUrl=(base:string,slug:string)=>base+(slug?'/'+slug:'/');

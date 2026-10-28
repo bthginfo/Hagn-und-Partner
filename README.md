@@ -29,7 +29,7 @@ node scripts/configure-auth.mjs
 npm run dev
 ```
 
-Ohne `DATABASE_URL` verwendet die lokale Entwicklung eine ignorierte Datei unter `.data/`. Auf Vercel ist Postgres erforderlich. Für die verbundenen Ressourcen kann stattdessen `vercel env pull .env.local` verwendet werden. Eine vorhandene `.env.local` dabei nicht mit der Beispieldatei überschreiben.
+Die lokale Entwicklung und Tests verwenden standardmäßig eine ignorierte Datei unter `.data/`. Das gilt auch mit vorhandener `DATABASE_URL`; bewusste entfernte Tests benötigen `HP_USE_REMOTE_DATABASE=1`. Auf Vercel ist Postgres erforderlich. Für die verbundenen Ressourcen kann `vercel env pull .env.local` verwendet werden. Eine vorhandene `.env.local` dabei nicht mit der Beispieldatei überschreiben.
 
 Bei einer neuen Postgres-Datenbank zuerst `DATABASE_URL` setzen, dann einmal `npm run db:setup` ausführen. Der Aufbau ist idempotent; vorhandene Inhalte werden nicht neu importiert. Normale Seitenaufrufe führen keine Migrationen aus.
 
@@ -38,6 +38,8 @@ Bei einer neuen Postgres-Datenbank zuerst `DATABASE_URL` setzen, dann einmal `np
 | Variable | Zweck |
 | --- | --- |
 | `DATABASE_URL` | Gepoolte Neon-Verbindung; vertraulich |
+| `HP_USE_REMOTE_DATABASE` | Nur in Entwicklung/Tests: `1` erlaubt bewusste entfernte Zugriffe |
+| `HP_DB_METRICS` | Sichere Diagnose von Abfragegrößen und Laufzeiten; keine Inhalts- oder Zugangsdaten |
 | `BLOB_READ_WRITE_TOKEN` | Zugriff auf den Medien-Store; vertraulich |
 | `AUTH_SECRET` | Zufallsschlüssel für verschlüsselte SMTP-Zugangsdaten; vertraulich, dauerhaft aufbewahren |
 | `ADMIN_INITIAL_PASSWORD_HASH` | Scrypt-Hash des ersten Passworts; nur für die erstmalige Einrichtung |
@@ -58,6 +60,8 @@ vercel deploy --prod
 
 Das Projekt liegt im Vercel-Team `juliusvingelheim-2692s-projects` und ist mit `bthginfo/Hagn-und-Partner` verbunden. Pushes auf `main` lösen die automatische Bereitstellung aus. Veröffentlichungen im CMS benötigen keinen Git-Push und funktionieren direkt auf der bereitgestellten Website. Die Datenbank und der Blob-Speicher gehören ebenfalls diesem Team.
 
+Seit dem 28. Oktober verwendet Hagn ausschließlich das eigene Neon-Free-Projekt `odd-frost-74601828` und den eigenen Blob-Store `store_KArEqkRY8JXoJF5n`. Mario Weddings, Mario Events und Amelie Lider haben jeweils eigene Projekte und Stores. Der [Bericht zur Speichertrennung](docs/storage-isolation.md) erklärt den früheren Transferverbrauch, die Migration, Messwerte und die Vorgehensweise für weitere Websites.
+
 Vor dem endgültigen Start die gewählte Gestaltung im CMS veröffentlichen, `NEXT_PUBLIC_DESIGN_REVIEW=false` setzen und erneut deployen. Dadurch verschwinden Umschalter und Entwurfs-Noindex. Die endgültige Domain unter **Einstellungen → Allgemein** eintragen. SMTP erst mit den tatsächlichen Zugangsdaten des Mailanbieters aktivieren.
 
 Das Projekt verwendet den bestehenden Vercel-Pro-Tarif des Zielteams. Es wurden keine zusätzlichen kostenpflichtigen Funktionen aktiviert. Neon bleibt im kostenlosen Tarif; Blob nutzt die Kontingente des bestehenden Vercel-Tarifs. Ein nie erreichtes Monatslimit kann keine Architektur garantieren; die öffentlichen Aufrufe benötigen nach dem Aufwärmen keine Datenbankabfrage.
@@ -76,4 +80,4 @@ Der Integrationstest erwartet das Administratorpasswort verborgen auf stdin. Er 
 
 Der Cache-Nachweis läuft gegen einen lokalen Production-Server mit `HP_DB_DIAGNOSTICS=1` über `node scripts/verify-cache.mjs http://localhost:3001`. Diese Diagnosevariable gehört nicht in den öffentlichen Betrieb. Axe ersetzt keine vollständige manuelle Prüfung mit realen Hilfsmitteln.
 
-Weitere Dokumentation: [Architektur](docs/architecture.md), [Inhalte und Quellen](docs/content-inventory.md), [Textprüfung](docs/copy-review.md), [Gestaltung](DESIGN.md), [Prüfbericht](docs/verification.md).
+Weitere Dokumentation: [Architektur](docs/architecture.md), [Inhalte und Quellen](docs/content-inventory.md), [Textprüfung](docs/copy-review.md), [Gestaltung](DESIGN.md), [Prüfbericht](docs/verification.md), [Speicher und Transfer](docs/storage-isolation.md).

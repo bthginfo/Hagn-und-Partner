@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --import ./tests/setup.mjs --test tests/*.test.ts",
     "db:setup": "node --conditions=react-server --env-file=.env.local --import=tsx scripts/setup-db.ts"
   },
   "dependencies": {

@@ -1,10 +1,10 @@
 # Prüfbericht
 
-Stand: 20. Oktober 2026. Geprüft wurde die Entwurfsfassung mit fünf Gestaltungen. Der Blog bleibt zunächst ausgeschaltet. Die Prüfungen verwenden eigene temporäre Testdaten; die ursprünglichen Inhalte wurden anschließend wiederhergestellt.
+Stand: 28. Oktober 2026. Die Gestaltungs- und Barrierefreiheitsprüfungen beziehen sich auf den 20. Oktober; Speichertrennung und Datenzugriff wurden am 28. Oktober zusätzlich live geprüft. Geprüft wurde die Entwurfsfassung mit fünf Gestaltungen. Der Blog bleibt zunächst ausgeschaltet. Die Prüfungen verwenden eigene temporäre Testdaten; die ursprünglichen Inhalte wurden anschließend wiederhergestellt.
 
 ## Funktion und Daten
 
-`npm test`: zwölf bestandene Tests für Inhaltsschema, Abschnittsbibliothek, Veröffentlichungsprüfung und Sicherheitsfunktionen. TypeScript und der lokale Production-Build liefen fehlerfrei. `npm audit` meldete nach den Aktualisierungen von Nodemailer und Sharp keine bekannten Schwachstellen.
+`npm test`: siebzehn bestandene Tests für Inhaltsschema, Abschnittsbibliothek, Veröffentlichungsprüfung, Sicherheitsfunktionen und Datenbankeffizienz. TypeScript und der lokale Production-Build liefen fehlerfrei. `npm audit` meldete nach den Aktualisierungen von Nodemailer und Sharp keine bekannten Schwachstellen.
 
 `scripts/verify-integration.mjs` prüfte sechzehn zusammenhängende Abläufe erfolgreich gegen den laufenden Server und die tatsächlich verbundenen Ressourcen:
 
@@ -56,6 +56,8 @@ Die nachträglich gewünschte Google-Maps-Einbettung wurde in allen fünf Entwü
 Der Design-Detektor wurde einmal ausgeführt. Seine fünf primären Hinweise bezogen sich auf benachbarte Regeln für eine flache redaktionelle Linie und abgerundete Unterelemente, nicht auf die gleiche Kartenumrandung. Die weiteren Hinweise betrafen überwiegend bewusste Token-Variationen der fünf Entwürfe. Visuelle Fehler wurden im Browser beurteilt.
 
 ## Bereitstellung
+
+Am 28. Oktober wurden Hagn, Mario Weddings, Mario Events und Amelie Lider vollständig in vier eigene Neon-Free-Projekte und vier eigene Blob-Stores getrennt. Hagn verwendet jetzt `odd-frost-74601828` und `store_KArEqkRY8JXoJF5n`; die weiter unten beschriebene Übertragung vom 20. Oktober ist der historische Ausgangsstand. Alle Tabellenkopien und Medienprüfsummen wurden verifiziert. Die 16 Integrationsabläufe bestanden erneut mit dem neuen tatsächlichen Hagn-Speicher. 111 öffentliche Routen der vier Websites und 222 anschließende warme Abrufe erzeugten keine zusätzliche öffentliche Inhaltsabfrage. Die übrigen CMS bestanden eigene Upload- und Zugangsprüfungen. Einzelheiten, Tarifgrenzen und die Vorgehensweise für neue Projekte stehen im [Bericht zur Speichertrennung](storage-isolation.md).
 
 Das Vercel-Projekt ist `hagn-und-partner`. Die Funktionsregion ist in `vercel.json` auf Frankfurt (`fra1`) begrenzt. Neon und der öffentliche Blob-Store wurden ebenfalls in Frankfurt angelegt. Eine Build- oder Sandbox-Region ist davon unabhängig.
 

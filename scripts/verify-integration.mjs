@@ -5,6 +5,7 @@ import {writeFile} from 'node:fs/promises';
 import sharp from 'sharp';
 
 const base=(process.argv[2]||'http://localhost:3000').replace(/\/$/,'');
+const expectedBlobHost=process.env.HP_VERIFY_BLOB_HOST;
 if(!/^https?:\/\//.test(base))throw new Error('Expected an absolute test URL.');
 if(process.stdin.isTTY)process.stdin.setRawMode(true);
 console.log('Administrator password expected on hidden stdin.');
@@ -13,7 +14,7 @@ let cookie='';let current;let original;let testAsset;let testInquiry;const check
 const mark=name=>{checks.push(name);console.log('PASS '+name);};
 async function request(path,{method='GET',body,auth=true,origin=base,headers={}}={}){
   const form=body instanceof FormData;
-  const response=await fetch(base+path,{method,headers:{...(method==='GET'?{}:{Origin:origin}),...(auth&&cookie?{Cookie:cookie}:{}),...(!form&&body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:form?body:JSON.stringify(body),redirect:'manual'});
+  const response=await fetch(base+path,{method,headers:{...(process.env.HP_VERIFY_VERCEL_BYPASS?{'x-vercel-protection-bypass':process.env.HP_VERIFY_VERCEL_BYPASS}:{}),...(method==='GET'?{}:{Origin:origin}),...(auth&&cookie?{Cookie:cookie}:{}),...(!form&&body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:form?body:JSON.stringify(body),redirect:'manual'});
   const raw=await response.text();let data;try{data=JSON.parse(raw);}catch{data=raw;}
   return {response,status:response.status,data};
 }
@@ -48,6 +49,7 @@ try{
   const bytes=await sharp({create:{width:32,height:32,channels:3,background:'#243d39'}}).png().toBuffer();const form=new FormData();form.append('file',new Blob([bytes],{type:'image/png'}),'qa-verification.png');form.append('alt','Technisches Testbild');
   const uploaded=await request('/api/admin/media',{method:'POST',body:form});assert.equal(uploaded.status,201);testAsset=uploaded.data.asset;
   assert(testAsset.url.includes('.public.blob.vercel-storage.com/'));assert.equal((await fetch(testAsset.url)).status,200);
+  if(expectedBlobHost)assert.equal(new URL(testAsset.url).hostname,expectedBlobHost,'Media upload reaches the intended Blob store');
   await mutation('media',{id:testAsset.id,alt:'Geänderte Beschreibung',position:'50% 0%'},'PATCH');await mutation('media',{id:testAsset.id},'DELETE');testAsset=undefined;mark('Real Frankfurt Blob upload, alt text, 9-point focus and deletion work');
   const subject='QA '+randomUUID();const sent=await request('/api/contact',{method:'POST',auth:false,body:{name:'Technische Funktionsprüfung',email:'qa@example.org',phone:'',subject,message:'Dies ist eine technische Testanfrage. Sie wird nach der Prüfung entfernt.',consent:true,website:''}});assert.equal(sent.status,201);
   const inquiries=await request('/api/admin/inquiries');testInquiry=inquiries.data.inquiries.find(entry=>entry.subject===subject);assert(testInquiry);assert.equal(testInquiry.emailStatus,'not-configured');
