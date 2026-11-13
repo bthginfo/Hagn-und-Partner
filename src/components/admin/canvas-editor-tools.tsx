@@ -1,5 +1,6 @@
 "use client";
 
+import { CanvasLinkDialog } from "./link-picker";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createSection } from "@/lib/section-library";
 import type { ContentItem, PageContent, Section, SectionType } from "@/lib/types";
@@ -19,6 +20,7 @@ export interface CanvasEditorToolsProps {
   children: ReactNode;
 }
 type ItemTarget = { sectionId: string; itemId: string };
+type LinkTarget = { sectionId: string; field: "primaryHref" | "secondaryHref" } | (ItemTarget & { field: "href" });
 type Coordinates = { section?: { top: number; right: number }; item?: { top: number; right: number } };
 const feeds = new Set(["blog-cards", "blog-editorial", "blog-list"]);
 const heroTypes = new Set(["hero", "editorial-hero", "cinematic-hero", "noir-hero", "navy-hero"]);
@@ -26,6 +28,9 @@ const heroTypes = new Set(["hero", "editorial-hero", "cinematic-hero", "noir-her
 function scrollFrame(element: HTMLElement) { let parent = element.parentElement; while (parent && parent !== document.body) { const overflow = getComputedStyle(parent).overflowY; if (/(auto|scroll)/.test(overflow)) return parent; parent = parent.parentElement; } return null; }
 
 export function CanvasEditorTools({ page, onChange, selectedSectionId, onSectionSelect, onItemSelect, lockedSectionIds = [], children }: CanvasEditorToolsProps) {
+  const [link, setLink] = useState<LinkTarget | null>(null);
+  const linkedSection = page.sections.find(section => section.id === link?.sectionId);
+  const linkedItem = link?.field === "href" ? linkedSection?.content.items?.find(item => item.id === link.itemId) : undefined;
   const root = useRef<HTMLDivElement>(null); const sectionBar = useRef<HTMLDivElement>(null); const itemBar = useRef<HTMLDivElement>(null); const hoveredItemElement = useRef<HTMLElement | null>(null); const [hoverSection, setHoverSection] = useState<string | null>(null); const [activeItem, setActiveItem] = useState<ItemTarget | null>(null); const [positions, setPositions] = useState<Coordinates>({}); const [insert, setInsert] = useState<{ sectionId: string; side: "before" | "after" } | null>(null); const [remove, setRemove] = useState<{ sectionId: string; itemId?: string } | null>(null); const [icon, setIcon] = useState<ItemTarget | null>(null); const [announcement, setAnnouncement] = useState("");
   const activeId = hoverSection || selectedSectionId; const activeSection = page.sections.find(section => section.id === activeId); const activeIndex = page.sections.findIndex(section => section.id === activeId); const locked = Boolean(activeId && lockedSectionIds.includes(activeId)); const itemSection = page.sections.find(section => section.id === activeItem?.sectionId); const itemIndex = itemSection?.content.items?.findIndex(item => item.id === activeItem?.itemId) ?? -1; const item = itemSection?.content.items?.[itemIndex]; const iconSection = page.sections.find(section => section.id === icon?.sectionId); const iconItem = iconSection?.content.items?.find(item => item.id === icon?.itemId);
   const measure = useCallback(() => {
@@ -49,8 +54,30 @@ export function CanvasEditorTools({ page, onChange, selectedSectionId, onSection
   function duplicateItem() { if (!itemSection || !item || heroTypes.has(itemSection.type)) return; const copy = { ...clone(item), id: newId() }; const entries = [...(itemSection.content.items || [])]; entries.splice(itemIndex + 1, 0, copy); changeSection({ ...itemSection, content: { ...itemSection.content, items: entries } }); select(itemSection.id, copy.id); reveal(itemSection.id, copy.id); announce("Eintrag dupliziert."); }
   function confirmRemove() { if (!remove) return; const section = page.sections.find(value => value.id === remove.sectionId); if (!section || lockedSectionIds.includes(section.id)) { setRemove(null); return; } if (remove.itemId) { changeSection({ ...section, content: { ...section.content, items: section.content.items?.filter(item => item.id !== remove.itemId) } }); setActiveItem(null); announce("Eintrag entfernt. Die Änderung lässt sich rückgängig machen."); } else { const index = page.sections.findIndex(value => value.id === section.id); const sections = page.sections.filter(value => value.id !== section.id); onChange({ ...page, sections }); setHoverSection(sections[Math.max(0, index - 1)]?.id || null); onSectionSelect?.(sections[Math.max(0, index - 1)]?.id || ""); setActiveItem(null); announce("Abschnitt entfernt. Die Änderung lässt sich rückgängig machen."); } setRemove(null); }
   function track(target: EventTarget | null) { if (!(target instanceof Element) || target.closest("[data-canvas-tools]")) return; const section = target.closest<HTMLElement>("[data-section-id]"); if (!section) return; const sectionId = section.dataset.sectionId; if (!sectionId) return; setHoverSection(sectionId); const entry = target.closest<HTMLElement>("[data-item-id]"); if (entry?.dataset.itemId && !feeds.has(page.sections.find(value => value.id === sectionId)?.type || "")) { hoveredItemElement.current = entry; setActiveItem({ sectionId, itemId: entry.dataset.itemId }); } else { hoveredItemElement.current = null; setActiveItem(null); } }
-  return <div ref={root} className="cms-canvas-editor" onPointerOver={event => track(event.target)} onFocusCapture={event => track(event.target)} onPointerLeave={() => setHoverSection(null)} onClickCapture={event => { const target = (event.target as Element).closest<HTMLElement>("[data-icon-item-id][data-icon-section-id]"); if (!target || target.closest("[data-canvas-tools]")) return; const sectionId = target.dataset.iconSectionId; const itemId = target.dataset.iconItemId; if (!sectionId || !itemId) return; event.preventDefault(); event.stopPropagation(); select(sectionId, itemId); setIcon({ sectionId, itemId }); }}>
+  return <div ref={root} className="cms-canvas-editor" onPointerOver={event => track(event.target)} onFocusCapture={event => track(event.target)} onPointerLeave={() => setHoverSection(null)} onClickCapture={event => {
+    const element = event.target as Element;
+    const button = element.closest<HTMLElement>("[data-canvas-link]");
+    if (button) {
+      const sectionId = button.closest<HTMLElement>("[data-section-id]")?.dataset.sectionId;
+      const field = button.dataset.canvasLink;
+      const itemId = button.dataset.canvasLinkItem || button.closest<HTMLElement>("[data-item-id]")?.dataset.itemId;
+      if (!sectionId || lockedSectionIds.includes(sectionId) || !page.sections.some(section => section.id === sectionId)) return;
+      if (field === "href" && itemId) setLink({ sectionId, itemId, field });
+      else if (field === "primaryHref" || field === "secondaryHref") setLink({ sectionId, field });
+      else return;
+      event.preventDefault(); event.stopPropagation(); select(sectionId, itemId); return;
+    }
+    const target = element.closest<HTMLElement>("[data-icon-item-id][data-icon-section-id]"); if (!target || target.closest("[data-canvas-tools]")) return; const sectionId = target.dataset.iconSectionId; const itemId = target.dataset.iconItemId; if (!sectionId || !itemId) return; event.preventDefault(); event.stopPropagation(); select(sectionId, itemId); setIcon({ sectionId, itemId }); }}>
     {children}
+    {link && linkedSection && (link.field !== "href" || linkedItem) && <CanvasLinkDialog
+      value={link.field === "href" ? linkedItem?.href : linkedSection.content[link.field]}
+      onClose={() => setLink(null)}
+      onSelect={value => {
+        const content = link.field === "href"
+          ? { ...linkedSection.content, items: linkedSection.content.items?.map(item => item.id === link.itemId ? { ...item, href: value } : item) }
+          : { ...linkedSection.content, [link.field]: value };
+        changeSection({ ...linkedSection, content }); setLink(null); announce("Linkziel geändert.");
+      }} />}
     <div className="cms-canvas-overlay" data-canvas-tools>
       {activeSection && positions.section && <div ref={sectionBar} className="cms-canvas-section-toolbar" role="toolbar" aria-label={`Abschnitt ${activeSection.name} bearbeiten`} style={{ top: positions.section.top, right: positions.section.right }} onClick={event => event.stopPropagation()}><span className="cms-canvas-section-label">{activeSection.name}</span>{locked ? <><button type="button" className="cms-canvas-text-button" onClick={() => onSectionSelect?.(activeSection.id)}><Settings2 size={15} />Angaben</button><button type="button" className="cms-canvas-text-button" onClick={() => setInsert({ sectionId: activeSection.id, side: "after" })}><Plus size={15} />Inhalt danach</button></> : <><button type="button" className="cms-canvas-text-button" onClick={() => setInsert({ sectionId: activeSection.id, side: "before" })} title="Abschnitt davor hinzufügen"><Plus size={14} />Davor</button><button type="button" className="cms-canvas-text-button" onClick={() => setInsert({ sectionId: activeSection.id, side: "after" })} title="Abschnitt danach hinzufügen"><Plus size={14} />Danach</button><i /><IconButton label="Abschnitt nach oben verschieben" disabled={activeIndex <= 0 || lockedSectionIds.includes(page.sections[activeIndex - 1]?.id)} onClick={() => moveSection(-1)}><ArrowUp size={16} /></IconButton><IconButton label="Abschnitt nach unten verschieben" disabled={activeIndex === page.sections.length - 1 || lockedSectionIds.includes(page.sections[activeIndex + 1]?.id)} onClick={() => moveSection(1)}><ArrowDown size={16} /></IconButton><IconButton label="Abschnitt duplizieren" onClick={duplicateSection}><Copy size={16} /></IconButton><IconButton label="Abschnitt entfernen" onClick={() => setRemove({ sectionId: activeSection.id })}><Trash2 size={16} /></IconButton>{!feeds.has(activeSection.type) && !heroTypes.has(activeSection.type) && sectionCapabilities(activeSection.type).items && <><i /><button type="button" className="cms-canvas-text-button" onClick={() => addItem(activeSection)}><Plus size={14} />Eintrag</button></>}</>}</div>}
       {item && itemSection && !heroTypes.has(itemSection.type) && !feeds.has(itemSection.type) && positions.item && <div ref={itemBar} className="cms-canvas-item-toolbar" role="toolbar" aria-label={`Eintrag ${item.title || "ohne Titel"} bearbeiten`} style={{ top: positions.item.top, right: positions.item.right }} onClick={event => event.stopPropagation()}><button type="button" className="cms-canvas-text-button" onClick={() => addItem(itemSection, item.id)} title="Eintrag dahinter hinzufügen"><Plus size={14} />Eintrag</button><i /><IconButton label="Eintrag nach vorn verschieben" disabled={itemIndex <= 0} onClick={() => moveItem(-1)}><ArrowUp size={14} /></IconButton><IconButton label="Eintrag nach hinten verschieben" disabled={itemIndex >= (itemSection.content.items?.length || 0) - 1} onClick={() => moveItem(1)}><ArrowDown size={14} /></IconButton><IconButton label="Eintrag duplizieren" onClick={duplicateItem}><Copy size={14} /></IconButton><IconButton label="Eintrag entfernen" onClick={() => setRemove({ sectionId: itemSection.id, itemId: item.id })}><Trash2 size={14} /></IconButton></div>}

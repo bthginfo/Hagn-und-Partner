@@ -1,3 +1,4 @@
+import { cmsAppearanceSchema } from "./cms-appearance-schema";
 import { z } from 'zod';
 import { SECTION_TYPES } from './types';
 import { safeLink } from './security';
@@ -7,7 +8,7 @@ const text = z.string().max(30000);
 const link = z.string().max(2000).refine(safeLink, 'Bitte einen sicheren Link angeben.');
 const color = z.string().regex(/^#(?:[\da-fA-F]{3}|[\da-fA-F]{6}|[\da-fA-F]{8})$/, 'Bitte eine Hex-Farbe angeben.');
 const image = z.object({src:link,alt:short,position:z.enum(['0% 0%','50% 0%','100% 0%','0% 50%','50% 50%','100% 50%','0% 100%','50% 100%','100% 100%']),caption:short.optional()});
-const item = z.object({id:short,title:short,text,image:image.optional(),icon:short.optional(),href:link.optional(),label:short.optional(),meta:short.optional(),email:short.optional(),phone:short.optional(),tags:z.array(short).max(30).optional(),details:z.array(text).max(60).optional()});
+const item = z.object({appearance:cmsAppearanceSchema.optional(),id:short,title:short,text,image:image.optional(),icon:short.optional(),href:link.optional(),label:short.optional(),meta:short.optional(),email:short.optional(),phone:short.optional(),tags:z.array(short).max(30).optional(),details:z.array(text).max(60).optional()});
 const navItem=z.object({label:short,href:link});
 const footer=z.object({brandText:short,ctaLabel:short,ctaHref:link,addressHeading:short,contactHeading:short,navigationHeading:short,copyright:short,showAddress:z.boolean(),showContact:z.boolean(),showHours:z.boolean(),showCookieSettings:z.boolean(),showBackToTop:z.boolean(),columns:z.array(z.object({id:short,title:short,links:z.array(navItem).max(30)})).max(8),legalLinks:z.array(navItem).max(20)});
 const blog=z.object({enabled:z.boolean(),title:short,description:z.string().max(2000),slug:z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/),layout:z.enum(['cards','editorial','list']),showInNavigation:z.boolean(),navLabel:short});
@@ -15,7 +16,7 @@ const palette=z.object({primary:color,accent:color,background:color,text:color,s
 export const sectionSchema = z.object({
   id:short.min(1),type:z.enum(SECTION_TYPES),name:short,visible:z.boolean(),anchor:z.string().max(100).regex(/^[a-zA-Z0-9_-]*$/).optional(),
   content:z.object({heading:short,subheading:text.optional(),text,image:image.optional(),images:z.array(image).max(60).optional(),items:z.array(item).max(150).optional(),primaryLabel:short.optional(),primaryHref:link.optional(),secondaryLabel:short.optional(),secondaryHref:link.optional(),quote:text.optional(),attribution:short.optional(),videoUrl:link.optional(),mapAddress:short.optional(),caption:short.optional()}).partial({text:true}),
-  design:z.object({heroLayout:z.enum(['auto','panorama','split','portrait','compact','bento']).optional(),theme:z.enum(['light','dark','accent','soft']),background:color.optional(),textColor:color.optional(),accentColor:color.optional(),headingFont:z.enum(['display','sans']),fontScale:z.number().min(.6).max(1.6),radius:z.number().min(0).max(60),border:z.number().min(0).max(6),spacing:z.enum(['compact','normal','airy']),width:z.enum(['normal','wide','full']),imageSide:z.enum(['left','right']),columns:z.union([z.literal(2),z.literal(3),z.literal(4)]),animation:z.enum(['none','reveal','parallax']),align:z.enum(['left','center'])})
+  design:z.object({...cmsAppearanceSchema.shape,heroLayout:z.enum(['auto','panorama','split','portrait','compact','bento']).optional(),theme:z.enum(['light','dark','accent','soft']),background:color.optional(),textColor:color.optional(),accentColor:color.optional(),headingFont:z.enum(['display','sans']),fontScale:z.number().min(.6).max(1.6),radius:z.number().min(0).max(60),border:z.number().min(0).max(6),spacing:z.enum(['compact','normal','airy']),width:z.enum(['normal','wide','full']),imageSide:z.enum(['left','right']),columns:z.union([z.literal(2),z.literal(3),z.literal(4)]),animation:z.enum(['none','reveal','parallax']),align:z.enum(['left','center'])})
 });
 export const blogPostSchema=z.object({id:short.min(1),slug:z.string().max(200).regex(/^[a-z0-9-]*$/),title:short,excerpt:z.string().max(3000),author:short,date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),updatedAt:short,status:z.enum(['draft','published']),cover:image.optional(),sections:z.array(sectionSchema).max(100),seo:z.object({title:short,description:z.string().max(2000),image:link.optional(),noindex:z.boolean().optional()})});
 export const websiteSchema = z.object({version:z.literal(1),config:z.object({

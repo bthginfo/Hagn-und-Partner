@@ -71,6 +71,7 @@ export function LinkPicker({ value = "", onChange, label = "Linkziel", disabled 
 }
 
 function LinkTargetDialog({ value, sources, currentPageId, allowEmpty, onClose, onSelect }: { value: string; sources: LinkSources; currentPageId?: string; allowEmpty: boolean; onClose: () => void; onSelect: (value: string) => void }) {
+  const adminText = (label: string) => label;
   const initial = findTarget(value, sources.pages, currentPageId);
   const initialKind: LinkKind = !value || value === "#" ? "page" : initial.page || value.startsWith("#") ? value.includes("#") ? "section" : "page" : value.startsWith("mailto:") ? "email" : value.startsWith("tel:") ? "phone" : "address";
   const [kind, setKind] = useState<LinkKind>(initialKind);
@@ -81,17 +82,12 @@ function LinkTargetDialog({ value, sources, currentPageId, allowEmpty, onClose, 
   const [email, setEmail] = useState(value.startsWith("mailto:") ? mailAddress(value) : sources.email);
   const [phone, setPhone] = useState(value.startsWith("tel:") ? value.slice(4) : sources.phone);
   const [error, setError] = useState(""); const id = useId();
-  const pageList = useRef<HTMLDivElement>(null);
   const selectedPage = sources.pages.find(page => page.id === selectedPageId);
   const sections = selectedPage?.sections.filter(section => section.visible) || [];
   const query = search.toLocaleLowerCase("de").trim();
   const pages = sources.pages.filter(page => `${page.title} ${page.href}`.toLocaleLowerCase("de").includes(query));
+  const pageOptions = pages.some(page => page.id === selectedPageId) || !selectedPage ? pages : [selectedPage, ...pages];
   const selectedSection = sections.find(section => anchorFor(section) === anchor);
-  useEffect(() => {
-    if (kind !== "page" || query) return;
-    const list = pageList.current; const selected = list?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (list && selected) list.scrollTop += selected.getBoundingClientRect().top - list.getBoundingClientRect().top - (list.clientHeight - selected.offsetHeight) / 2;
-  }, [kind, selectedPageId, query]);
   const unchangedSection = initial.page?.id === selectedPageId && initial.anchor === anchor;
   const mailSuffix = value.startsWith("mailto:") && value.includes("?") ? value.slice(value.indexOf("?")) : "";
   const target = kind === "page" ? selectedPage?.href || "" : kind === "section" ? selectedPage && selectedSection ? unchangedSection && value.includes("#") ? value : `${selectedPage.href}#${anchorFor(selectedSection)}` : "" : kind === "address" ? normalizeAddress(address) : kind === "email" ? value.startsWith("mailto:") && email.trim() === mailAddress(value) ? value : `mailto:${email.trim()}${mailSuffix}` : kind === "phone" ? value.startsWith("tel:") && phone === value.slice(4) ? value : `tel:${phone.replace(/[^+\d]/g, "")}` : "";
@@ -102,8 +98,22 @@ function LinkTargetDialog({ value, sources, currentPageId, allowEmpty, onClose, 
   return <Modal title="Linkziel auswählen" description="Wählen Sie eine Seite oder einen Abschnitt Ihrer Website. Eine andere Adresse können Sie selbst eingeben." onClose={onClose} footer={<><Button onClick={onClose}>Abbrechen</Button><Button variant="primary" disabled={!valid} onClick={() => { if (valid) onSelect(target); else setError("Wählen Sie ein Ziel aus oder prüfen Sie die eingegebene Adresse."); }}><Check size={16} />{kind === "none" ? "Link entfernen" : "Link übernehmen"}</Button></>}>
     <div className="cms-link-target-modes" role="group" aria-label="Art des Linkziels">{modes.filter(mode => allowEmpty || mode.value !== "none").map(mode => <button type="button" key={mode.value} aria-pressed={kind === mode.value} onClick={() => changeKind(mode.value)}><mode.icon size={17} aria-hidden="true" />{mode.label}</button>)}</div>
     <div className="cms-link-target-content">
-      {kind === "page" && <><SearchField value={search} onChange={setSearch} placeholder="Seite oder Beitrag suchen …" label="Linkziele durchsuchen" /><div ref={pageList} className="cms-link-target-pages" role="group" aria-label="Seite auswählen">{pages.map(page => <button type="button" key={page.id} aria-pressed={selectedPageId === page.id} onClick={() => { setSelectedPageId(page.id); setAnchor(""); setError(""); }}><span className="cms-link-page-image">{page.image ? <img src={page.image.src} alt="" style={{ objectPosition: page.image.position }} /> : <FileText size={22} aria-hidden="true" />}</span><span><strong>{page.title}</strong><small>{page.href}{page.warning ? " · noch nicht öffentlich erreichbar" : ""}</small></span>{selectedPageId === page.id ? <Check size={18} aria-hidden="true" /> : <ArrowRight size={17} aria-hidden="true" />}</button>)}</div>{!pages.length && <p className="cms-link-empty">Keine passende Seite gefunden. Versuchen Sie einen anderen Suchbegriff.</p>}{selectedPage && sections.length > 0 && <Button className="cms-link-choose-section" onClick={() => changeKind("section")}><Hash size={16} />Optional: Abschnitt auf dieser Seite wählen</Button>}</>}
-      {kind === "section" && <><Field label="Seite mit dem gewünschten Abschnitt"><Select value={selectedPageId} onChange={event => { setSelectedPageId(event.target.value); setAnchor(""); }}><option value="">Seite auswählen …</option>{sources.pages.map(page => <option key={page.id} value={page.id}>{page.title}</option>)}</Select></Field>{selectedPage && <div className="cms-link-target-sections" role="group" aria-label="Abschnitt auswählen">{sections.map((section, index) => <button type="button" key={section.id} aria-pressed={anchor === anchorFor(section)} onClick={() => setAnchor(anchorFor(section))}><span className="cms-link-section-number">{index + 1}</span><span><strong>{sectionLabel(section)}</strong><small>{section.name}</small></span>{anchor === anchorFor(section) ? <Check size={18} aria-hidden="true" /> : <Hash size={17} aria-hidden="true" />}</button>)}{!sections.length && <p className="cms-link-empty">Diese Seite enthält noch keine sichtbaren Abschnitte. Sie können die ganze Seite verlinken.</p>}</div>}</>}
+      {(kind === "page" || kind === "section") && <>
+        {sources.pages.length > 8 && <SearchField value={search} onChange={setSearch} placeholder={adminText("Seite oder Beitrag suchen …")} label={adminText("Linkziele durchsuchen")} />}
+        <Field label={adminText(kind === "page" ? "Seite auswählen" : "Seite mit dem gewünschten Abschnitt")}>
+          <Select value={selectedPageId} onChange={event => { setSelectedPageId(event.target.value); setAnchor(""); setError(""); }}>
+            <option value="">{adminText("Seite auswählen …")}</option>
+            {pageOptions.map(page => <option key={page.id} value={page.id}>{page.title} · {page.href}</option>)}
+          </Select>
+        </Field>
+        {!pages.length && <p className="cms-link-empty">{adminText("Keine passende Seite gefunden. Versuchen Sie einen anderen Suchbegriff.")}</p>}
+        {kind === "section" && selectedPage && (sections.length > 0
+          ? <Field label={adminText("Abschnitt auswählen")}><Select value={anchor} onChange={event => setAnchor(event.target.value)}>
+              <option value="">—</option>{sections.map(section => <option key={section.id} value={anchorFor(section)}>{sectionLabel(section)}</option>)}
+            </Select></Field>
+          : <p className="cms-link-empty">{adminText("Diese Seite enthält noch keine sichtbaren Abschnitte. Sie können die ganze Seite verlinken.")}</p>)}
+        {kind === "page" && selectedPage && sections.length > 0 && <Button className="cms-link-choose-section" onClick={() => changeKind("section")}><Hash size={16} />{adminText("Optional: Abschnitt auf dieser Seite wählen")}</Button>}
+      </>}
       {kind === "address" && <Field label="Internet- oder Dateiadresse" hint="Zum Beispiel https://www.beispiel.de oder /downloads/formular.pdf."><Input type="text" inputMode="url" autoComplete="url" placeholder="https://…" value={address} onChange={event => { setAddress(event.target.value); setError(""); }} /></Field>}
       {kind === "email" && <Field label="E-Mail-Adresse" hint="Beim Anklicken öffnet sich das E-Mail-Programm."><Input type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} /></Field>}
       {kind === "phone" && <Field label="Telefonnummer" hint="Beim Anklicken kann die Nummer angerufen werden."><Input type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} /></Field>}
@@ -113,4 +123,10 @@ function LinkTargetDialog({ value, sources, currentPageId, allowEmpty, onClose, 
       {error && <Notice tone="error">{error}</Notice>}
     </div>
   </Modal>;
+}
+
+export function CanvasLinkDialog({ value = "", onClose, onSelect }: { value?: string; onClose: () => void; onSelect: (value: string) => void }) {
+  const sources = useContext(SourcesContext);
+  const currentPageId = useContext(CurrentPageContext);
+  return <LinkTargetDialog value={value} sources={sources} currentPageId={currentPageId} allowEmpty onClose={onClose} onSelect={onSelect} />;
 }

@@ -91,3 +91,9 @@
   .cms-link-page-image { width:43px; height:43px; flex-basis:43px; }
   .cms-link-target-pages > button,.cms-link-target-sections > button { gap:10px; padding-inline:10px; }
 }
+
+.cms-canvas-editor [data-content-link]{position:relative}
+.cms-canvas-link{position:absolute;z-index:5;inset:-12px -12px auto auto;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid #c4d2c4;background:#fff;color:#183228;cursor:pointer;box-shadow:0 2px 10px #142b2720;transform:scale(var(--cms-preview-inverse-scale,1));transform-origin:top right}
+.cms-canvas-link:focus-visible{outline:2px solid #548038}
+.cms-library-groups{display:grid;gap:22px}.cms-library-group>h3{margin:0 0 10px;font-size:14px}.cms-appearance-fields{margin:10px 0}
+@media(max-width:1000px){.cms-device-switch .cms-icon-button,.cms-preview-scale-tools>button{min-width:44px;min-height:44px}.cms-preview-bar{flex-wrap:wrap}.cms-canvas-link{width:44px;height:44px}}

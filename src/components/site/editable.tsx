@@ -1,5 +1,6 @@
 "use client";
 
+import { Link2 as CanvasLinkIcon } from "lucide-react";
 import { createContext, useContext, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { Check, ImagePlus, LoaderCircle, Maximize2, Upload, X } from "lucide-react";
 import type { ContentItem, ImagePosition, ImageValue, MediaAsset } from "@/lib/types";
@@ -75,11 +76,17 @@ export function safeHref(href?: string) {
   return "#";
 }
 
-export function ContentLink({ href, editable, children, className = "", label, download, target }: {
+export function ContentLink({ href, editable, children, className = "", label, download, target, editField, editItemId }: {
   href?: string; editable?: boolean; children: ReactNode; className?: string; label?: string;
-  download?: boolean; target?: "_blank";
+  download?: boolean; target?: "_blank"; editField?: "primaryHref" | "secondaryHref" | "href"; editItemId?: string;
 }) {
-  if (editable) return <div className={className} data-content-link="">{children}</div>;
+  const t = (label: string) => label;
+  if (editable) return <div className={className} data-content-link="">{children}
+    {editField && <button type="button" className="cms-canvas-link" data-canvas-link={editField}
+      data-canvas-link-item={editItemId} aria-label={t("Linkziel bearbeiten")} title={t("Linkziel bearbeiten")}>
+      <CanvasLinkIcon size={15} aria-hidden="true" />
+    </button>}
+  </div>;
   return <a href={safeHref(href)} className={className} aria-label={label}
     download={download || undefined} target={target} rel={target ? "noopener noreferrer" : undefined}
   >{children}</a>;
