@@ -1,5 +1,6 @@
 "use client";
 
+import { collectionColumns } from "@/lib/collection-editing";
 import { useId } from "react";
 import { cmsAppearanceCss } from "@/lib/cms-appearance";
 import { useGalleryLightbox } from './gallery-lightbox';
@@ -164,7 +165,7 @@ export function SectionRenderer({ section, site, editable = false, selected, onS
   const style: SectionStyle = {
     "--section-bg": d.background || themeDefaults.background, "--section-fg": d.textColor || themeDefaults.color,
     "--section-accent": d.accentColor || "var(--hp-accent)", "--section-scale": d.fontScale,
-    "--section-radius": `${d.radius}px`, "--section-columns": d.columns,
+    "--section-radius": `${d.radius}px`, "--section-columns": collectionColumns(d.columns, c.items?.length ?? 0),
     "--section-heading-font": d.headingFont === "sans" ? "var(--font-body)" : "var(--hp-display)",
     borderWidth: d.border ? `${d.border}px` : undefined,
   };

@@ -1054,3 +1054,6 @@
   .hp-site:is(.hp-design-1,.hp-design-2,.hp-design-3) .hp-contact-form .hp-form-help { font-size: 14px; line-height: 1.65; }
   .hp-design-1 .hp-section :is(.hp-section-text,.hp-statement-text,.hp-richtext-body,.hp-editorial-card > p,.hp-content-columns p,.hp-content-list p,.hp-steps p,.hp-faq-answer > p) { font-size: calc(1rem * var(--section-scale,1)); line-height: 1.8; }
 }
+
+/* A single item fills its grid even at tablet breakpoints. */
+:is(.ws-editorial-cards,.ws-team-grid,.ws-steps,.ws-stats,.ws-comparison,.ws-content-columns):has(> [data-item-id]:only-child){grid-template-columns:minmax(0,1fr)}

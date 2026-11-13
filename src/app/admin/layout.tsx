@@ -3,6 +3,7 @@ import '../../styles/admin.css';
 import '../../styles/blog-admin.css';
 import '../../styles/canvas-editor.css';
 import '../../styles/admin-refinements.css';
+import "../../styles/cms-collections.css";
 import '../../styles/guided-tour.css';
 export const metadata:Metadata={title:'Website-Verwaltung · Hagn & Partner',robots:{index:false,follow:false}};
 export const dynamic='force-dynamic';

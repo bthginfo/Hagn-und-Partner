@@ -1,5 +1,6 @@
 "use client";
 
+import { updateDraftAddresses } from "@/lib/draft-link-addresses";
 import { CurrentLinkPageProvider } from "./link-picker";
 import { normalizeSlug } from "@/lib/slug";
 
@@ -23,7 +24,11 @@ export function PageEditor({ content, cmsState, onChange, media, onUpload, dirty
   useEffect(()=>{const select=(value:string|undefined)=>{if(value&&["outline","preview","properties"].includes(value))setMobileTab(value as "outline"|"preview"|"properties");};const handler=(event:Event)=>select((event as CustomEvent).detail);select(document.querySelector<HTMLElement>(".cms-app")?.dataset.tourEditor);window.addEventListener("hp:tour-editor",handler);return()=>window.removeEventListener("hp:tour-editor",handler);},[]);
   const page = content.pages.find(candidate => candidate.id === pageId) || content.pages[0]; const section = page?.sections.find(candidate => candidate.id === sectionId);
   useEffect(() => { if (!content.pages.some(candidate => candidate.id === pageId)) { setPageId(content.pages[0]?.id || ""); setSectionId(content.pages[0]?.sections[0]?.id || ""); } }, [content.pages, pageId]);
-  function updatePage(next: PageContent) { onChange({ ...content, pages: content.pages.map(candidate => candidate.id === next.id ? next : candidate) }); }
+  function updatePage(next: PageContent) {
+    const before = content.pages.find(candidate => candidate.id === next.id);
+    const draft = { ...content, pages: content.pages.map(candidate => candidate.id === next.id ? next : candidate) };
+    onChange(before ? updateDraftAddresses(draft, before, next) : draft);
+  }
   function updateSection(next: Section) { if (page) updatePage({ ...page, sections: page.sections.map(candidate => candidate.id === next.id ? next : candidate) }); }
   function selectPage(id: string) { const next = content.pages.find(candidate => candidate.id === id); setPageId(id); setSectionId(next?.sections[0]?.id || ""); setInspectorMode("section"); if (stage.current) stage.current.scrollTop = 0; }
   function selectSection(id: string, fromOutline = false) { setSectionId(id); setInspectorMode("section"); if (fromOutline) { const element = stage.current?.querySelector(`[data-section-id="${CSS.escape(id)}"]`) || stage.current?.querySelector(`[data-section="${CSS.escape(id)}"]`); if (element && stage.current?.clientHeight) { const host=stage.current; const offset=element.getBoundingClientRect().top-host.getBoundingClientRect().top-18; host.scrollBy({top:offset,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"}); }; } }
@@ -69,7 +74,7 @@ export function PageEditor({ content, cmsState, onChange, media, onUpload, dirty
           <div className={`cms-preview-stage cms-preview-stage--${device}`} ref={stage}><PreviewFrame device={device}><CanvasEditorTools page={page} onChange={updatePage} selectedSectionId={inspectorMode === "section" ? sectionId : undefined} onSectionSelect={id => selectSection(id)} onItemSelect={(id, itemId) => { selectSection(id); setSelectedItemId(itemId); }}><SiteView page={hydrateBlogSections(page, content, true)} site={content.config} media={media} variant={previewVariant} editable selectedSectionId={inspectorMode === "section" ? sectionId : undefined} onSectionSelect={id => selectSection(id)} onSectionChange={updateSection} /></CanvasEditorTools></PreviewFrame></div>
           <div className="cms-preview-hint"><PencilHint />Text in der Vorschau anklicken und direkt bearbeiten.</div>
         </section>
-        <aside className="cms-inspector" aria-label="Inhalt und Gestaltung">{inspectorMode === "page" ? <PageInspector key={page.id} page={page} onChange={updatePage} media={media} onUpload={onUpload} /> : section ? <SectionInspector key={section.id} section={section} onChange={updateSection} onDuplicate={duplicateSection} onDelete={() => setDeleteSection(section)} media={media} onUpload={onUpload} selectedItemId={selectedItemId} onFocusText={focusCanvasText} /> : <EmptyState icon={Layers3} title="Abschnitt auswählen">Klicken Sie auf einen Abschnitt im Seitenaufbau oder fügen Sie einen neuen hinzu.</EmptyState>}</aside>
+        <aside className="cms-inspector" aria-label="Inhalt und Gestaltung">{inspectorMode === "page" ? <PageInspector key={page.id} page={page} usedSlugs={content.pages.filter(candidate => candidate.id !== page.id).map(candidate => candidate.slug)} onChange={updatePage} media={media} onUpload={onUpload} /> : section ? <SectionInspector key={section.id} section={section} usedAnchors={page.sections.filter(candidate => candidate.id !== section.id).map(candidate => candidate.anchor || candidate.id)} onChange={updateSection} onDuplicate={duplicateSection} onDelete={() => setDeleteSection(section)} media={media} onUpload={onUpload} selectedItemId={selectedItemId} onFocusText={focusCanvasText} /> : <EmptyState icon={Layers3} title="Abschnitt auswählen">Klicken Sie auf einen Abschnitt im Seitenaufbau oder fügen Sie einen neuen hinzu.</EmptyState>}</aside>
       </div>
       {library && <SectionLibraryDialog onClose={() => setLibrary(false)} onSelect={addSection} />}
       {pageModal && <NewPageDialog existing={content.pages} onClose={() => setPageModal(false)} onCreate={next => { onChange({ ...content, pages: [...content.pages, next] }); setPageId(next.id); setSectionId(next.sections[0]?.id || ""); setPageModal(false); setInspectorMode("page"); }} />}

@@ -27,6 +27,22 @@ const heroTypes = new Set(["hero", "editorial-hero", "cinematic-hero", "noir-her
 
 function scrollFrame(element: HTMLElement) { let parent = element.parentElement; while (parent && parent !== document.body) { const overflow = getComputedStyle(parent).overflowY; if (/(auto|scroll)/.test(overflow)) return parent; parent = parent.parentElement; } return null; }
 
+export function focusSectionText(root: ParentNode | null, sectionId: string, itemId?: string) {
+  const selector = `[data-section-id="${CSS.escape(sectionId)}"]${itemId ? ` [data-item-id="${CSS.escape(itemId)}"]` : ""}`;
+  const focus = () => {
+    const text = root?.querySelector(selector)?.querySelector<HTMLElement>("[contenteditable=true]");
+    text?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    text?.focus({ preventScroll: true });
+  };
+  const first = root?.querySelector(selector);
+  if (itemId && first instanceof HTMLButtonElement) {
+    first.click();
+    requestAnimationFrame(focus);
+  } else {
+    focus();
+  }
+}
+
 export function CanvasEditorTools({ page, onChange, selectedSectionId, onSectionSelect, onItemSelect, lockedSectionIds = [], children }: CanvasEditorToolsProps) {
   const [link, setLink] = useState<LinkTarget | null>(null);
   const linkedSection = page.sections.find(section => section.id === link?.sectionId);
@@ -49,7 +65,7 @@ export function CanvasEditorTools({ page, onChange, selectedSectionId, onSection
   function moveSection(direction: number) { if (!activeSection || locked) return; const sections = [...page.sections]; const next = activeIndex + direction; if (next < 0 || next >= sections.length || lockedSectionIds.includes(sections[next].id)) return; [sections[activeIndex], sections[next]] = [sections[next], sections[activeIndex]]; onChange({ ...page, sections }); select(activeSection.id); reveal(activeSection.id); announce("Abschnitt verschoben."); }
   function duplicateSection() { if (!activeSection || locked) return; const copy = clone(activeSection); copy.id = newId(); delete copy.anchor; copy.name += " · Kopie"; copy.content.items = copy.content.items?.map(item => ({ ...item, id: newId() })); const sections = [...page.sections]; sections.splice(activeIndex + 1, 0, copy); onChange({ ...page, sections }); select(copy.id); reveal(copy.id); announce("Abschnitt dupliziert."); }
   function insertSection(type: SectionType) { if (!insert) return; const section = createSection(type); const index = page.sections.findIndex(value => value.id === insert.sectionId); const sections = [...page.sections]; sections.splice(Math.max(0, index + (insert.side === "after" ? 1 : 0)), 0, section); onChange({ ...page, sections }); select(section.id); setInsert(null); reveal(section.id); announce("Abschnitt hinzugefügt. Bearbeiten Sie die Inhalte direkt auf der Seite."); }
-  function addItem(section: Section, afterId?: string) { if (heroTypes.has(section.type) || feeds.has(section.type)) return; const entries = [...(section.content.items || [])]; const index = afterId ? entries.findIndex(item => item.id === afterId) : entries.length - 1; const newItem: ContentItem = { id: newId(), title: "", text: "", icon: "ArrowUpRight" }; entries.splice(index + 1, 0, newItem); changeSection({ ...section, content: { ...section.content, items: entries } }); select(section.id, newItem.id); reveal(section.id, newItem.id); announce("Eintrag hinzugefügt. Klicken Sie auf die leeren Textfelder, um ihn zu bearbeiten."); }
+  function addItem(section: Section, afterId?: string) { if (heroTypes.has(section.type) || feeds.has(section.type)) return; const entries = [...(section.content.items || [])]; if (entries.length >= 150) return; const index = afterId ? entries.findIndex(item => item.id === afterId) : entries.length - 1; const newItem: ContentItem = { id: newId(), title: "", text: "", icon: "ArrowUpRight" }; entries.splice(index + 1, 0, newItem); changeSection({ ...section, content: { ...section.content, items: entries } }); select(section.id, newItem.id); requestAnimationFrame(() => requestAnimationFrame(() => focusSectionText(root.current, section.id, newItem.id))); announce("Eintrag hinzugefügt. Klicken Sie auf die leeren Textfelder, um ihn zu bearbeiten."); }
   function moveItem(direction: number) { if (!itemSection || !item || itemIndex < 0 || heroTypes.has(itemSection.type)) return; const entries = [...(itemSection.content.items || [])]; const next = itemIndex + direction; if (next < 0 || next >= entries.length) return; [entries[itemIndex], entries[next]] = [entries[next], entries[itemIndex]]; changeSection({ ...itemSection, content: { ...itemSection.content, items: entries } }); select(itemSection.id, item.id); reveal(itemSection.id, item.id); announce("Eintrag verschoben."); }
   function duplicateItem() { if (!itemSection || !item || heroTypes.has(itemSection.type)) return; const copy = { ...clone(item), id: newId() }; const entries = [...(itemSection.content.items || [])]; entries.splice(itemIndex + 1, 0, copy); changeSection({ ...itemSection, content: { ...itemSection.content, items: entries } }); select(itemSection.id, copy.id); reveal(itemSection.id, copy.id); announce("Eintrag dupliziert."); }
   function confirmRemove() { if (!remove) return; const section = page.sections.find(value => value.id === remove.sectionId); if (!section || lockedSectionIds.includes(section.id)) { setRemove(null); return; } if (remove.itemId) { changeSection({ ...section, content: { ...section.content, items: section.content.items?.filter(item => item.id !== remove.itemId) } }); setActiveItem(null); announce("Eintrag entfernt. Die Änderung lässt sich rückgängig machen."); } else { const index = page.sections.findIndex(value => value.id === section.id); const sections = page.sections.filter(value => value.id !== section.id); onChange({ ...page, sections }); setHoverSection(sections[Math.max(0, index - 1)]?.id || null); onSectionSelect?.(sections[Math.max(0, index - 1)]?.id || ""); setActiveItem(null); announce("Abschnitt entfernt. Die Änderung lässt sich rückgängig machen."); } setRemove(null); }
